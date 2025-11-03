@@ -1,0 +1,332 @@
+export const VifReaderAbi = [
+	{
+		type: 'constructor',
+		inputs: [{ name: '_vif', type: 'address', internalType: 'address' }],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'VIF',
+		inputs: [],
+		outputs: [{ name: '', type: 'address', internalType: 'address' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'authorizerNonce',
+		inputs: [{ name: 'authorizer', type: 'address', internalType: 'address' }],
+		outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'fees',
+		inputs: [{ name: 'token', type: 'address', internalType: 'address' }],
+		outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'isAuthorized',
+		inputs: [
+			{ name: 'authorizer', type: 'address', internalType: 'address' },
+			{ name: 'authorized', type: 'address', internalType: 'address' },
+		],
+		outputs: [{ name: '', type: 'bool', internalType: 'bool' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'isBlacklisted',
+		inputs: [{ name: 'user', type: 'address', internalType: 'address' }],
+		outputs: [{ name: '', type: 'bool', internalType: 'bool' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'isPaused',
+		inputs: [],
+		outputs: [{ name: '', type: 'bool', internalType: 'bool' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'market',
+		inputs: [{ name: 'marketId', type: 'bytes32', internalType: 'bytes32' }],
+		outputs: [
+			{
+				name: '',
+				type: 'tuple',
+				internalType: 'struct Market',
+				components: [
+					{ name: 'outboundToken', type: 'address', internalType: 'address' },
+					{ name: 'outboundUnits', type: 'uint64', internalType: 'uint64' },
+					{ name: 'minOutboundUnits', type: 'uint32', internalType: 'uint32' },
+					{ name: 'active', type: 'bool', internalType: 'bool' },
+					{ name: 'inboundToken', type: 'address', internalType: 'address' },
+					{ name: 'inboundUnits', type: 'uint64', internalType: 'uint64' },
+					{ name: 'tickSpacing', type: 'uint16', internalType: 'uint16' },
+					{ name: 'fees', type: 'uint16', internalType: 'uint16' },
+				],
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'minProvision',
+		inputs: [],
+		outputs: [{ name: '', type: 'uint24', internalType: 'uint24' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'offer',
+		inputs: [
+			{ name: 'marketId', type: 'bytes32', internalType: 'bytes32' },
+			{ name: 'offerId', type: 'uint40', internalType: 'uint40' },
+		],
+		outputs: [
+			{
+				name: '_offer',
+				type: 'tuple',
+				internalType: 'struct OfferUnpacked',
+				components: [
+					{ name: 'prev', type: 'uint40', internalType: 'uint40' },
+					{ name: 'next', type: 'uint40', internalType: 'uint40' },
+					{ name: 'expiry', type: 'uint32', internalType: 'uint32' },
+					{ name: 'gives', type: 'uint48', internalType: 'uint48' },
+					{ name: 'received', type: 'uint48', internalType: 'uint48' },
+					{ name: 'tick', type: 'int24', internalType: 'int24' },
+					{ name: 'provision', type: 'uint24', internalType: 'uint24' },
+					{ name: 'isActive', type: 'bool', internalType: 'bool' },
+				],
+			},
+			{ name: 'owner', type: 'address', internalType: 'address' },
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'offerListEndPoints',
+		inputs: [
+			{ name: 'marketId', type: 'bytes32', internalType: 'bytes32' },
+			{ name: 'fromId', type: 'uint40', internalType: 'uint40' },
+			{ name: 'maxOffers', type: 'uint256', internalType: 'uint256' },
+		],
+		outputs: [
+			{ name: 'startId', type: 'uint40', internalType: 'uint40' },
+			{ name: 'length', type: 'uint256', internalType: 'uint256' },
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'offerPacked',
+		inputs: [
+			{ name: 'marketId', type: 'bytes32', internalType: 'bytes32' },
+			{ name: 'offerId', type: 'uint40', internalType: 'uint40' },
+		],
+		outputs: [
+			{ name: '_offer', type: 'uint256', internalType: 'uint256' },
+			{ name: 'owner', type: 'address', internalType: 'address' },
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'openMarkets',
+		inputs: [
+			{ name: 'from', type: 'uint256', internalType: 'uint256' },
+			{ name: 'maxLength', type: 'uint256', internalType: 'uint256' },
+		],
+		outputs: [
+			{
+				name: 'results',
+				type: 'tuple[]',
+				internalType: 'struct VifReader.OpenMarketsResult[]',
+				components: [
+					{
+						name: 'market01',
+						type: 'tuple',
+						internalType: 'struct Market',
+						components: [
+							{
+								name: 'outboundToken',
+								type: 'address',
+								internalType: 'address',
+							},
+							{ name: 'outboundUnits', type: 'uint64', internalType: 'uint64' },
+							{
+								name: 'minOutboundUnits',
+								type: 'uint32',
+								internalType: 'uint32',
+							},
+							{ name: 'active', type: 'bool', internalType: 'bool' },
+							{
+								name: 'inboundToken',
+								type: 'address',
+								internalType: 'address',
+							},
+							{ name: 'inboundUnits', type: 'uint64', internalType: 'uint64' },
+							{ name: 'tickSpacing', type: 'uint16', internalType: 'uint16' },
+							{ name: 'fees', type: 'uint16', internalType: 'uint16' },
+						],
+					},
+					{
+						name: 'market10',
+						type: 'tuple',
+						internalType: 'struct Market',
+						components: [
+							{
+								name: 'outboundToken',
+								type: 'address',
+								internalType: 'address',
+							},
+							{ name: 'outboundUnits', type: 'uint64', internalType: 'uint64' },
+							{
+								name: 'minOutboundUnits',
+								type: 'uint32',
+								internalType: 'uint32',
+							},
+							{ name: 'active', type: 'bool', internalType: 'bool' },
+							{
+								name: 'inboundToken',
+								type: 'address',
+								internalType: 'address',
+							},
+							{ name: 'inboundUnits', type: 'uint64', internalType: 'uint64' },
+							{ name: 'tickSpacing', type: 'uint16', internalType: 'uint16' },
+							{ name: 'fees', type: 'uint16', internalType: 'uint16' },
+						],
+					},
+				],
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'openMarkets',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'tuple[]',
+				internalType: 'struct VifReader.OpenMarketsResult[]',
+				components: [
+					{
+						name: 'market01',
+						type: 'tuple',
+						internalType: 'struct Market',
+						components: [
+							{
+								name: 'outboundToken',
+								type: 'address',
+								internalType: 'address',
+							},
+							{ name: 'outboundUnits', type: 'uint64', internalType: 'uint64' },
+							{
+								name: 'minOutboundUnits',
+								type: 'uint32',
+								internalType: 'uint32',
+							},
+							{ name: 'active', type: 'bool', internalType: 'bool' },
+							{
+								name: 'inboundToken',
+								type: 'address',
+								internalType: 'address',
+							},
+							{ name: 'inboundUnits', type: 'uint64', internalType: 'uint64' },
+							{ name: 'tickSpacing', type: 'uint16', internalType: 'uint16' },
+							{ name: 'fees', type: 'uint16', internalType: 'uint16' },
+						],
+					},
+					{
+						name: 'market10',
+						type: 'tuple',
+						internalType: 'struct Market',
+						components: [
+							{
+								name: 'outboundToken',
+								type: 'address',
+								internalType: 'address',
+							},
+							{ name: 'outboundUnits', type: 'uint64', internalType: 'uint64' },
+							{
+								name: 'minOutboundUnits',
+								type: 'uint32',
+								internalType: 'uint32',
+							},
+							{ name: 'active', type: 'bool', internalType: 'bool' },
+							{
+								name: 'inboundToken',
+								type: 'address',
+								internalType: 'address',
+							},
+							{ name: 'inboundUnits', type: 'uint64', internalType: 'uint64' },
+							{ name: 'tickSpacing', type: 'uint16', internalType: 'uint16' },
+							{ name: 'fees', type: 'uint16', internalType: 'uint16' },
+						],
+					},
+				],
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'openMarketsLength',
+		inputs: [],
+		outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'packedBook',
+		inputs: [
+			{ name: 'marketId', type: 'bytes32', internalType: 'bytes32' },
+			{ name: 'fromPricePoint', type: 'uint24', internalType: 'uint24' },
+			{ name: 'maxPricePoints', type: 'uint24', internalType: 'uint24' },
+		],
+		outputs: [
+			{ name: 'nextPricePoint', type: 'uint24', internalType: 'uint24' },
+			{
+				name: 'offerListsPacked',
+				type: 'uint256[]',
+				internalType: 'uint256[]',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'packedOfferList',
+		inputs: [
+			{ name: 'marketId', type: 'bytes32', internalType: 'bytes32' },
+			{ name: 'fromId', type: 'uint40', internalType: 'uint40' },
+			{ name: 'maxOffers', type: 'uint256', internalType: 'uint256' },
+		],
+		outputs: [
+			{ name: 'nextOfferId', type: 'uint40', internalType: 'uint40' },
+			{ name: 'offerIds', type: 'uint40[]', internalType: 'uint40[]' },
+			{ name: 'offers', type: 'uint256[]', internalType: 'uint256[]' },
+			{ name: 'owners', type: 'address[]', internalType: 'address[]' },
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'updateMarkets',
+		inputs: [
+			{ name: 'token0', type: 'address', internalType: 'address' },
+			{ name: 'token1', type: 'address', internalType: 'address' },
+			{ name: 'units0', type: 'uint64', internalType: 'uint64' },
+			{ name: 'units1', type: 'uint64', internalType: 'uint64' },
+			{ name: 'tickSpacing', type: 'uint16', internalType: 'uint16' },
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{ type: 'error', name: 'OfferNotActive', inputs: [] },
+] as const

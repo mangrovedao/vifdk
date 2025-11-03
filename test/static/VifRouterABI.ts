@@ -1,0 +1,191 @@
+export const VifRouterAbi = [
+	{
+		type: 'constructor',
+		inputs: [
+			{ name: 'vif', type: 'address', internalType: 'address' },
+			{ name: 'weth', type: 'address', internalType: 'address' },
+			{ name: 'owner', type: 'address', internalType: 'address' },
+		],
+		stateMutability: 'nonpayable',
+	},
+	{ type: 'fallback', stateMutability: 'payable' },
+	{ type: 'receive', stateMutability: 'payable' },
+	{
+		type: 'function',
+		name: 'VIF',
+		inputs: [],
+		outputs: [{ name: '', type: 'address', internalType: 'contract IVif' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'cancelOwnershipHandover',
+		inputs: [],
+		outputs: [],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'completeOwnershipHandover',
+		inputs: [
+			{ name: 'pendingOwner', type: 'address', internalType: 'address' },
+		],
+		outputs: [],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'execute',
+		inputs: [
+			{ name: 'commands', type: 'bytes', internalType: 'bytes' },
+			{ name: 'args', type: 'bytes[]', internalType: 'bytes[]' },
+		],
+		outputs: [
+			{
+				name: 'result',
+				type: 'tuple[]',
+				internalType: 'struct DispatchResult[]',
+				components: [
+					{ name: 'success', type: 'bool', internalType: 'bool' },
+					{ name: 'returnData', type: 'bytes', internalType: 'bytes' },
+				],
+			},
+		],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'execute',
+		inputs: [
+			{ name: 'commands', type: 'bytes', internalType: 'bytes' },
+			{ name: 'args', type: 'bytes[]', internalType: 'bytes[]' },
+			{ name: 'deadline', type: 'uint256', internalType: 'uint256' },
+		],
+		outputs: [
+			{
+				name: 'result',
+				type: 'tuple[]',
+				internalType: 'struct DispatchResult[]',
+				components: [
+					{ name: 'success', type: 'bool', internalType: 'bool' },
+					{ name: 'returnData', type: 'bytes', internalType: 'bytes' },
+				],
+			},
+		],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'isPaused',
+		inputs: [],
+		outputs: [{ name: 'result', type: 'bool', internalType: 'bool' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'lockCallback',
+		inputs: [{ name: 'data', type: 'bytes', internalType: 'bytes' }],
+		outputs: [{ name: 'result', type: 'bytes', internalType: 'bytes' }],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'owner',
+		inputs: [],
+		outputs: [{ name: 'result', type: 'address', internalType: 'address' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'ownershipHandoverExpiresAt',
+		inputs: [
+			{ name: 'pendingOwner', type: 'address', internalType: 'address' },
+		],
+		outputs: [{ name: 'result', type: 'uint256', internalType: 'uint256' }],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'renounceOwnership',
+		inputs: [],
+		outputs: [],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'requestOwnershipHandover',
+		inputs: [],
+		outputs: [],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'setPaused',
+		inputs: [{ name: 'paused', type: 'bool', internalType: 'bool' }],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'transferOwnership',
+		inputs: [{ name: 'newOwner', type: 'address', internalType: 'address' }],
+		outputs: [],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'event',
+		name: 'OwnershipHandoverCanceled',
+		inputs: [
+			{
+				name: 'pendingOwner',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'OwnershipHandoverRequested',
+		inputs: [
+			{
+				name: 'pendingOwner',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'OwnershipTransferred',
+		inputs: [
+			{
+				name: 'oldOwner',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'newOwner',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+		],
+		anonymous: false,
+	},
+	{ type: 'error', name: 'AlreadyInitialized', inputs: [] },
+	{ type: 'error', name: 'FnSelectorNotRecognized', inputs: [] },
+	{ type: 'error', name: 'InvalidCaller', inputs: [] },
+	{ type: 'error', name: 'MultiOrderCannotFail', inputs: [] },
+	{ type: 'error', name: 'NewOwnerIsZeroAddress', inputs: [] },
+	{ type: 'error', name: 'NoHandoverRequest', inputs: [] },
+	{ type: 'error', name: 'NotEnoughLiquidityMultiOrderExactOut', inputs: [] },
+	{ type: 'error', name: 'Reentrancy', inputs: [] },
+	{ type: 'error', name: 'SlippageTooHigh', inputs: [] },
+	{ type: 'error', name: 'TransactionExpired', inputs: [] },
+	{ type: 'error', name: 'Unauthorized', inputs: [] },
+] as const

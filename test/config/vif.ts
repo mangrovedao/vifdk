@@ -1,0 +1,366 @@
+import { type Address, type Client, isAddressEqual } from 'viem'
+import {
+	deployContract,
+	multicall,
+	readContract,
+	waitForTransactionReceipt,
+	writeContract,
+} from 'viem/actions'
+import { rawOffer } from '../../src/builder/core/offer'
+import { Market, type SemiMarket } from '../../src/lib/market'
+import { Offer } from '../../src/lib/offer'
+import type { Tick } from '../../src/lib/tick'
+import { Token, type TokenAmount } from '../../src/lib/token'
+import type { VifRouterActions } from '../../src/router/actions/actions'
+import type { Action } from '../../src/router/actions/enum'
+import type {
+	LimitOrderResult,
+	OrderResult,
+} from '../../src/router/actions/types'
+import { VifRouter } from '../../src/router/router'
+import { bytesCodes } from '../static/bytescodes'
+import { VifAbi } from '../static/VifAbi'
+import { VifReaderAbi } from '../static/VifReaderABI'
+import { VifRouterAbi } from '../static/VifRouterABI'
+import { mint } from './mint'
+import { approveIfNeeded, config, mintTokens } from './tokens'
+
+export async function deployVif(
+	client: Client,
+	admin: Address,
+	provision: number,
+): Promise<Address> {
+	const bytecode = await bytesCodes()
+	const hash = await deployContract(client, {
+		abi: VifAbi,
+		bytecode: bytecode.Vif,
+		args: [admin, provision],
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+		chain: client.chain,
+	})
+	const receipt = await waitForTransactionReceipt(client, { hash })
+	const vif = receipt.contractAddress
+	if (!vif) throw new Error('VIF not deployed')
+	return vif
+}
+
+export async function deployVifReader(
+	client: Client,
+	vif: Address,
+): Promise<Address> {
+	const bytecode = await bytesCodes()
+	const hash = await deployContract(client, {
+		abi: VifReaderAbi,
+		bytecode: bytecode.VifReader,
+		args: [vif],
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+		chain: client.chain,
+	})
+	const receipt = await waitForTransactionReceipt(client, { hash })
+	const vifReader = receipt.contractAddress
+	if (!vifReader) throw new Error('VIFReader not deployed')
+	return vifReader
+}
+
+export async function deployVifRouter(
+	client: Client,
+	vif: Address,
+	weth: Address,
+	admin: Address,
+): Promise<Address> {
+	const bytecode = await bytesCodes()
+	const hash = await deployContract(client, {
+		abi: VifRouterAbi,
+		bytecode: bytecode.VifRouter,
+		args: [vif, weth, admin],
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+		chain: client.chain,
+	})
+	const receipt = await waitForTransactionReceipt(client, { hash })
+	const vifRouter = receipt.contractAddress
+	if (!vifRouter) throw new Error('VIFRouter not deployed')
+	return vifRouter
+}
+
+export async function authorize(
+	client: Client,
+	vif: Address,
+	target: Address,
+): Promise<void> {
+	const hash = await writeContract(client, {
+		address: vif,
+		abi: VifAbi,
+		functionName: 'authorize',
+		args: [target, true],
+		chain: client.chain,
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+	})
+	await waitForTransactionReceipt(client, { hash })
+}
+
+export async function openMarket(
+	client: Client,
+	base: TokenAmount,
+	quote: TokenAmount,
+	tickSpacing: bigint,
+	fees: number,
+): Promise<Market> {
+	const hashAsks = await writeContract(client, {
+		address: config.Vif,
+		abi: VifAbi,
+		functionName: 'openMarket',
+		args: [
+			base.token.address,
+			quote.token.address,
+			base.token.unit,
+			quote.token.unit,
+			Number(tickSpacing),
+			fees,
+			Number(base.amount / base.token.unit),
+		],
+		chain: client.chain,
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+	})
+	const hashBids = await writeContract(client, {
+		address: config.Vif,
+		abi: VifAbi,
+		functionName: 'openMarket',
+		args: [
+			quote.token.address,
+			base.token.address,
+			quote.token.unit,
+			base.token.unit,
+			Number(tickSpacing),
+			fees,
+			Number(quote.amount / quote.token.unit),
+		],
+		chain: client.chain,
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+	})
+	const hashReader = await writeContract(client, {
+		address: config.VifReader,
+		abi: VifReaderAbi,
+		functionName: 'updateMarkets',
+		args: [
+			base.token.address,
+			quote.token.address,
+			base.token.unit,
+			quote.token.unit,
+			Number(tickSpacing),
+		],
+		chain: client.chain,
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+	})
+	await Promise.all([
+		waitForTransactionReceipt(client, { hash: hashAsks }),
+		waitForTransactionReceipt(client, { hash: hashBids }),
+		waitForTransactionReceipt(client, { hash: hashReader }),
+	])
+	return Market.create({
+		base,
+		quote,
+		tickSpacing,
+		askFees: fees,
+		bidsFees: fees,
+	})
+}
+
+export async function createOffer(
+	client: Client,
+	market: SemiMarket,
+	gives: TokenAmount,
+	tick: Tick,
+	expiry?: Date,
+	provision?: TokenAmount,
+): Promise<Offer> {
+	// biome-ignore lint/style/noNonNullAssertion: test env
+	const router = new VifRouter(config.VifRouter, config.Vif, client.chain!.id)
+	const actions = router
+		.createActions()
+		.limitSingle({
+			market,
+			gives,
+			tick,
+			expiry,
+			provision,
+		})
+		.settleAll(gives.token)
+		.settleAll(Token.NATIVE_TOKEN)
+		.build()
+
+	await mint(client, gives)
+
+	const data = actions.txData()
+
+	await approveIfNeeded(client, [gives.token], config.Vif)
+
+	const hash = await writeContract(client, {
+		address: config.VifRouter,
+		abi: VifRouterAbi,
+		functionName: 'execute',
+		args: [data.commands, data.args],
+		value: expiry ? (provision?.amount ?? config.provision.amount) : 0n,
+		chain: client.chain,
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+	})
+	const receipt = await waitForTransactionReceipt(client, { hash })
+	const [lo] = actions.parseLogs(receipt.logs)
+
+	if (!lo) throw new Error('Limit order not found')
+
+	return readContract(client, {
+		address: config.Vif,
+		...rawOffer(market, lo.offerId),
+	}).then((val) =>
+		Offer.fromPacked(market, val, lo.offerId, client.account?.address),
+	)
+}
+
+type SingleOffer = {
+	market: SemiMarket
+	gives: TokenAmount
+	tick: Tick
+	expiry?: Date
+	provision?: TokenAmount
+}
+
+export async function createOffers(
+	client: Client,
+	offers: SingleOffer[],
+): Promise<Offer[]> {
+	await mintTokens(
+		client,
+		offers.map((o) => o.gives),
+	)
+	await approveIfNeeded(
+		client,
+		offers.map((o) => o.gives.token),
+		config.Vif,
+	)
+
+	// biome-ignore lint/style/noNonNullAssertion: test env
+	const router = new VifRouter(config.VifRouter, config.Vif, client.chain!.id)
+
+	const builder = router.createActions()
+
+	const totalProvision = Token.PROVISION_TOKEN.amount(0n)
+
+	const tokens = new Map<Address, Token>()
+
+	for (const offer of offers) {
+		builder.limitSingle({
+			market: offer.market,
+			gives: offer.gives,
+			tick: offer.tick,
+			expiry: offer.expiry,
+			provision: offer.provision,
+		})
+
+		tokens.set(offer.gives.token.address, offer.gives.token)
+		totalProvision.amount += offer.provision?.amount ?? config.provision.amount
+	}
+
+	for (const token of tokens.values()) {
+		builder.settleAll(token)
+	}
+
+	const actions = builder
+		.settleAll(Token.NATIVE_TOKEN)
+		.build() as VifRouterActions<Action[]>
+
+	const { commands, args } = actions.txData()
+
+	const hash = await writeContract(client, {
+		address: config.VifRouter,
+		abi: VifRouterAbi,
+		functionName: 'execute',
+		args: [commands, args],
+		chain: client.chain,
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+		value: totalProvision.amount,
+	})
+	const receipt = await waitForTransactionReceipt(client, { hash })
+	const results = actions.parseLogs(receipt.logs)
+	return multicall(client, {
+		contracts: offers.map(
+			(offer, i) =>
+				({
+					address: config.Vif,
+					...rawOffer(
+						offer.market,
+						// biome-ignore lint/style/noNonNullAssertion: test env
+						(results[i] as LimitOrderResult | undefined)!.offerId,
+					),
+				}) as const,
+		),
+		allowFailure: false,
+	}).then((multicallRes) =>
+		multicallRes.map((r, i) =>
+			Offer.fromPacked(
+				// biome-ignore lint/style/noNonNullAssertion: test env
+				offers[i]!.market,
+				r,
+				// biome-ignore lint/style/noNonNullAssertion: test env
+				(results[i] as LimitOrderResult | undefined)!.offerId,
+				// biome-ignore lint/style/noNonNullAssertion: test env
+				client.account!.address,
+			),
+		),
+	)
+}
+
+export async function marketOrder(
+	client: Client,
+	market: SemiMarket,
+	amount: TokenAmount,
+): Promise<OrderResult> {
+	if (!isAddressEqual(amount.token.address, market.inboundToken.address)) {
+		throw new Error('Amount token does not match market inbound token')
+	}
+	await mint(client, amount)
+	await approveIfNeeded(client, [amount.token], config.Vif)
+	// biome-ignore lint/style/noNonNullAssertion: test env
+	const router = new VifRouter(config.VifRouter, config.Vif, client.chain!.id)
+	const actions = router
+		.createActions()
+		.orderSingle({
+			market,
+			fillVolume: amount,
+		})
+		.settleAll(amount.token)
+		.takeAll({
+			// biome-ignore lint/style/noNonNullAssertion: test env
+			receiver: client.account!.address,
+			token: market.outboundToken,
+		})
+		.takeAll({
+			// biome-ignore lint/style/noNonNullAssertion: test env
+			receiver: client.account!.address,
+			token: Token.NATIVE_TOKEN,
+		})
+		.build()
+	const { commands, args } = actions.txData()
+	const hash = await writeContract(client, {
+		address: config.VifRouter,
+		abi: VifRouterAbi,
+		functionName: 'execute',
+		args: [commands, args],
+		chain: client.chain,
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		account: client.account!,
+	})
+
+	const receipt = await waitForTransactionReceipt(client, { hash })
+	const results = actions.parseLogs(receipt.logs)
+	// biome-ignore lint/style/noNonNullAssertion: result is defined
+	return results[0]!
+}
