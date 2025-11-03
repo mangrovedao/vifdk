@@ -1,4 +1,11 @@
-import { encodeAbiParameters, type Hex, isAddressEqual, keccak256 } from 'viem'
+import {
+	type ContractFunctionReturnType,
+	encodeAbiParameters,
+	type Hex,
+	isAddressEqual,
+	keccak256,
+} from 'viem'
+import type { OPEN_MARKETS_ABI } from '../builder/reader'
 import { InvalidTokenError } from '../router/actions/errors'
 import { FEES_BITS, MAX_TICK_SPACING, MIN_TICK_SPACING } from './constants'
 import { Tick } from './tick'
@@ -54,6 +61,13 @@ export type CreateMarketArg = {
 	/** Fees of the bid market */
 	bidsFees?: number
 }
+
+/** Result of the openMarkets function */
+export type OpenMarketResult = ContractFunctionReturnType<
+	typeof OPEN_MARKETS_ABI,
+	'view',
+	'openMarkets'
+>[number]
 
 /** Represents a market */
 export class Market {
@@ -245,6 +259,60 @@ export class Market {
 		return Market._createSingle(params) as TArgs extends CreateMarketArg[]
 			? Market[]
 			: Market
+	}
+
+	/**
+	 * Creates a market from an open market result
+	 * @param result - The open market result
+	 * @param tokens
+	 * - The tokens to create the market from
+	 * - These tokens should be ordered by descending cashness (stable tokens first, tokens with higher volatility last)
+	 * @returns The market or undefined if the tokens are not found
+	 * @example
+	 * const markets = await client.readContract({
+	 * 	address: config.VifReader,
+	 * 	...openMarkets(),
+	 * })
+	 * const markets = Market.fromOpenMarketResult(markets, tokens)
+	 * })
+	 */
+	static fromOpenMarketResult(
+		result: OpenMarketResult,
+		tokens: Token[],
+	): Market | undefined {
+		const index0 = tokens.findIndex((token) =>
+			isAddressEqual(token.address, result.market01.outboundToken),
+		)
+		const index1 = tokens.findIndex((token) =>
+			isAddressEqual(token.address, result.market01.inboundToken),
+		)
+		if (index0 === -1 || index1 === -1) {
+			return undefined
+		}
+		const isReversed = index0 > index1
+
+		// biome-ignore lint/style/noNonNullAssertion: we know the tokens are in the array
+		const token0 = tokens[index0]!.withUnit(result.market01.outboundUnits)
+		// biome-ignore lint/style/noNonNullAssertion: we know the tokens are in the array
+		const token1 = tokens[index1]!.withUnit(result.market01.inboundUnits)
+
+		return Market.create(
+			isReversed
+				? {
+						base: token1,
+						quote: token0,
+						tickSpacing: BigInt(result.market01.tickSpacing),
+						askFees: result.market10.fees,
+						bidsFees: result.market01.fees,
+					}
+				: {
+						base: token0,
+						quote: token1,
+						tickSpacing: BigInt(result.market01.tickSpacing),
+						askFees: result.market01.fees,
+						bidsFees: result.market10.fees,
+					},
+		)
 	}
 
 	/**
