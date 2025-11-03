@@ -8,8 +8,8 @@ import {
 } from 'viem'
 import { multicall, readContract } from 'viem/actions'
 import {
+	type OPEN_MARKETS_ABI,
 	openMarkets,
-	type openMarketsABI,
 	tokenMetadataWithFallback,
 } from '../builder/reader/open-markets'
 import { Market } from '../lib/market'
@@ -152,7 +152,7 @@ export function openMarketsActions(vifReader: Address) {
 				...args,
 				address: vifReader,
 				...openMarkets(from, to),
-			} as ReadContractParameters<typeof openMarketsABI, 'openMarkets'>)
+			} as ReadContractParameters<typeof OPEN_MARKETS_ABI, 'openMarkets'>)
 			const tokensSet = new Set<Address>()
 			for (const market of markets) {
 				tokensSet.add(market.market01.outboundToken)
