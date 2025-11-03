@@ -2,7 +2,6 @@ import { expect } from 'bun:test'
 import { createWalletClient, http, publicActions, testActions } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import { anvil } from 'viem/chains'
-import { ipc } from 'viem/node'
 import { config } from './config/tokens'
 
 export const MNEMONIC =

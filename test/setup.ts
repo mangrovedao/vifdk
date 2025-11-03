@@ -8,15 +8,7 @@ import {
 	deployVifRouter,
 	openMarket,
 } from './config/vif'
-import {
-	BASE_IPC,
-	BASE_PORT,
-	baseClient,
-	IPC,
-	MNEMONIC,
-	mainClient,
-	PORT,
-} from './utils'
+import { BASE_IPC, BASE_PORT, baseClient, IPC, MNEMONIC, PORT } from './utils'
 
 let baseInstance: Instance | undefined
 let proolInstance: Instance | undefined
@@ -83,10 +75,10 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-	// if (!proolInstance) throw new Error("Prool instance not started");
-	// await proolInstance.restart();
-	const client = mainClient()
-	await client.reset()
+	if (!proolInstance) throw new Error('Prool instance not started')
+	await proolInstance.restart()
+	// const client = mainClient()
+	// await client.reset()
 })
 
 afterAll(async () => {
