@@ -9,7 +9,7 @@ import { VifRouterAbi } from '../static/VifRouterABI'
 import { mainClient } from '../utils'
 
 describe('Limit order', () => {
-	it.only('should create a limit order, and parse it correctly', async () => {
+	it('should create a limit order, and parse it correctly', async () => {
 		const client = mainClient()
 		await authorize(client, config.Vif, config.VifRouter)
 		// create a sell order for 1 ETH
