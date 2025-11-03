@@ -78,8 +78,6 @@ beforeAll(async () => {
 beforeEach(async () => {
 	if (!proolInstance) throw new Error('Prool instance not started')
 	await proolInstance.restart()
-	// const client = mainClient()
-	// await client.reset()
 })
 
 afterAll(async () => {
