@@ -19,10 +19,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Show Anvil version
+        run: anvil --version
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
+      - name: Show Bun version
+        run: bun --version
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
