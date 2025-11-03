@@ -1,21 +1,18 @@
 import {
 	type Address,
 	type Client,
+	encodeDeployData,
 	maxUint128,
 	maxUint256,
 	parseAbi,
 } from 'viem'
-import {
-	deployContract,
-	multicall,
-	waitForTransactionReceipt,
-	writeContract,
-} from 'viem/actions'
+import { multicall, writeContractSync } from 'viem/actions'
 import { Market } from '../../src/lib/market'
 import { Token, type TokenAmount } from '../../src/lib/token'
 import { bytesCodes } from '../static/bytescodes'
 import { ERC20Abi } from '../static/ERC20Abi'
 import { mint } from './mint'
+import { deploy } from './utils'
 
 type Config = {
 	WETH: Token
@@ -49,17 +46,12 @@ export async function deployToken(
 	units: bigint,
 ): Promise<Token> {
 	const bytecode = await bytesCodes()
-	const hash = await deployContract(client, {
+	const params = encodeDeployData({
 		abi: ERC20Abi,
-		bytecode: bytecode.ERC20,
 		args: [name, symbol, decimals],
-		// biome-ignore lint/style/noNonNullAssertion: test env
-		account: client.account!,
-		chain: client.chain,
+		bytecode: bytecode.ERC20,
 	})
-	const receipt = await waitForTransactionReceipt(client, { hash })
-	const token = receipt.contractAddress
-	if (!token) throw new Error('Token not deployed')
+	const token = await deploy(client, params, 'Token')
 	return Token.from(token, decimals, symbol, units)
 }
 
@@ -68,16 +60,11 @@ export async function deployWETH(
 	units: bigint,
 ): Promise<Token> {
 	const bytecode = await bytesCodes()
-	const hash = await deployContract(client, {
+	const params = encodeDeployData({
 		abi: parseAbi(['constructor()']),
 		bytecode: bytecode.WETH,
-		// biome-ignore lint/style/noNonNullAssertion: test env
-		account: client.account!,
-		chain: client.chain,
 	})
-	const receipt = await waitForTransactionReceipt(client, { hash })
-	const token = receipt.contractAddress
-	if (!token) throw new Error('WETH not deployed')
+	const token = await deploy(client, params, 'WETH')
 	return Token.from(token, 18, 'WETH', units)
 }
 
@@ -122,7 +109,7 @@ export async function approveIfNeeded(
 
 	for (const [i, approval] of approvals.entries()) {
 		if (approval < maxUint128) {
-			const tx = await writeContract(client, {
+			await writeContractSync(client, {
 				// biome-ignore lint/style/noNonNullAssertion: test env
 				address: addresses[i]!,
 				abi: ERC20Abi,
@@ -132,7 +119,6 @@ export async function approveIfNeeded(
 				// biome-ignore lint/style/noNonNullAssertion: test env
 				account: client.account!,
 			})
-			await waitForTransactionReceipt(client, { hash: tx })
 		}
 	}
 }

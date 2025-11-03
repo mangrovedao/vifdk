@@ -65,8 +65,7 @@ describe('Market order', () => {
 		expect(parsedSimulationResult[1]).toBeUndefined()
 		expect(parsedSimulationResult[2]).toBeUndefined()
 
-		const tx = await client.writeContract(request)
-		const receipt = await client.waitForTransactionReceipt({ hash: tx })
+		const receipt = await client.writeContractSync(request)
 		const results = actions.parseLogs(receipt.logs)
 
 		expect(results).toBeDefined()

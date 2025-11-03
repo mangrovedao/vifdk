@@ -9,7 +9,7 @@ import { VifRouterAbi } from '../static/VifRouterABI'
 import { mainClient } from '../utils'
 
 describe('Limit order', () => {
-	it('should create a limit order, and parse it correctly', async () => {
+	it.only('should create a limit order, and parse it correctly', async () => {
 		const client = mainClient()
 		await authorize(client, config.Vif, config.VifRouter)
 		// create a sell order for 1 ETH
@@ -57,8 +57,7 @@ describe('Limit order', () => {
 		expect(parsedSimulationResult[1].claimedReceived.amount).toBe(0n)
 		expect(parsedSimulationResult[1].offerId).toBe(1)
 
-		const tx = await client.writeContract(request)
-		const receipt = await client.waitForTransactionReceipt({ hash: tx })
+		const receipt = await client.writeContractSync(request)
 
 		const parsedReceipt = actions.parseLogs(receipt.logs)
 
@@ -151,8 +150,7 @@ describe('Limit order', () => {
 		expect(parsedSimulationResult[2]).toBeUndefined()
 		expect(parsedSimulationResult[3]).toBeUndefined()
 
-		const tx = await client.writeContract(request)
-		const receipt = await client.waitForTransactionReceipt({ hash: tx })
+		const receipt = await client.writeContractSync(request)
 		const parsedReceipt = actions.parseLogs(receipt.logs)
 
 		expect(parsedReceipt).toBeDefined()
@@ -225,9 +223,9 @@ describe('Limit order', () => {
 		expect(parsedSimulationResult[2]).toBeUndefined()
 		expect(parsedSimulationResult[3]).toBeUndefined()
 
-		const tx = await client.writeContract(request)
-		const receipt = await client.waitForTransactionReceipt({ hash: tx })
+		const receipt = await client.writeContractSync(request)
 		const parsedReceipt = actions.parseLogs(receipt.logs)
+
 		expect(parsedReceipt).toBeDefined()
 		expect(parsedReceipt.length).toBe(4)
 		expect(parsedReceipt[0]).toBeDefined()
@@ -285,9 +283,9 @@ describe('Limit order', () => {
 		expect(parsedSimulationResult[0].provision.amount).toBe(0n)
 		expect(parsedSimulationResult[1]).toBeUndefined()
 
-		const tx = await client.writeContract(request)
-		const receipt = await client.waitForTransactionReceipt({ hash: tx })
+		const receipt = await client.writeContractSync(request)
 		const parsedReceipt = actions.parseLogs(receipt.logs)
+
 		expect(parsedReceipt).toBeDefined()
 		expect(parsedReceipt.length).toBe(2)
 		expect(parsedReceipt[0]).toBeDefined()

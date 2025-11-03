@@ -70,6 +70,7 @@ beforeAll(async () => {
 		ipc: IPC,
 		forkUrl: BASE_IPC,
 		forkBlockNumber: initBlock,
+		// silent: false,
 	})
 	await proolInstance.start()
 })

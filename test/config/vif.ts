@@ -1,11 +1,10 @@
-import { type Address, type Client, isAddressEqual } from 'viem'
 import {
-	deployContract,
-	multicall,
-	readContract,
-	waitForTransactionReceipt,
-	writeContract,
-} from 'viem/actions'
+	type Address,
+	type Client,
+	encodeDeployData,
+	isAddressEqual,
+} from 'viem'
+import { multicall, readContract, writeContractSync } from 'viem/actions'
 import { rawOffer } from '../../src/builder/core/offer'
 import { Market, type SemiMarket } from '../../src/lib/market'
 import { Offer } from '../../src/lib/offer'
@@ -24,6 +23,7 @@ import { VifReaderAbi } from '../static/VifReaderABI'
 import { VifRouterAbi } from '../static/VifRouterABI'
 import { mint } from './mint'
 import { approveIfNeeded, config, mintTokens } from './tokens'
+import { deploy } from './utils'
 
 export async function deployVif(
 	client: Client,
@@ -31,18 +31,12 @@ export async function deployVif(
 	provision: number,
 ): Promise<Address> {
 	const bytecode = await bytesCodes()
-	const hash = await deployContract(client, {
+	const params = encodeDeployData({
 		abi: VifAbi,
 		bytecode: bytecode.Vif,
 		args: [admin, provision],
-		// biome-ignore lint/style/noNonNullAssertion: test env
-		account: client.account!,
-		chain: client.chain,
 	})
-	const receipt = await waitForTransactionReceipt(client, { hash })
-	const vif = receipt.contractAddress
-	if (!vif) throw new Error('VIF not deployed')
-	return vif
+	return deploy(client, params, 'VIF')
 }
 
 export async function deployVifReader(
@@ -50,18 +44,12 @@ export async function deployVifReader(
 	vif: Address,
 ): Promise<Address> {
 	const bytecode = await bytesCodes()
-	const hash = await deployContract(client, {
+	const params = encodeDeployData({
 		abi: VifReaderAbi,
 		bytecode: bytecode.VifReader,
 		args: [vif],
-		// biome-ignore lint/style/noNonNullAssertion: test env
-		account: client.account!,
-		chain: client.chain,
 	})
-	const receipt = await waitForTransactionReceipt(client, { hash })
-	const vifReader = receipt.contractAddress
-	if (!vifReader) throw new Error('VIFReader not deployed')
-	return vifReader
+	return deploy(client, params, 'VIFReader')
 }
 
 export async function deployVifRouter(
@@ -71,18 +59,12 @@ export async function deployVifRouter(
 	admin: Address,
 ): Promise<Address> {
 	const bytecode = await bytesCodes()
-	const hash = await deployContract(client, {
+	const params = encodeDeployData({
 		abi: VifRouterAbi,
 		bytecode: bytecode.VifRouter,
 		args: [vif, weth, admin],
-		// biome-ignore lint/style/noNonNullAssertion: test env
-		account: client.account!,
-		chain: client.chain,
 	})
-	const receipt = await waitForTransactionReceipt(client, { hash })
-	const vifRouter = receipt.contractAddress
-	if (!vifRouter) throw new Error('VIFRouter not deployed')
-	return vifRouter
+	return deploy(client, params, 'VIFRouter')
 }
 
 export async function authorize(
@@ -90,7 +72,7 @@ export async function authorize(
 	vif: Address,
 	target: Address,
 ): Promise<void> {
-	const hash = await writeContract(client, {
+	await writeContractSync(client, {
 		address: vif,
 		abi: VifAbi,
 		functionName: 'authorize',
@@ -99,7 +81,6 @@ export async function authorize(
 		// biome-ignore lint/style/noNonNullAssertion: test env
 		account: client.account!,
 	})
-	await waitForTransactionReceipt(client, { hash })
 }
 
 export async function openMarket(
@@ -109,7 +90,7 @@ export async function openMarket(
 	tickSpacing: bigint,
 	fees: number,
 ): Promise<Market> {
-	const hashAsks = await writeContract(client, {
+	await writeContractSync(client, {
 		address: config.Vif,
 		abi: VifAbi,
 		functionName: 'openMarket',
@@ -126,7 +107,7 @@ export async function openMarket(
 		// biome-ignore lint/style/noNonNullAssertion: test env
 		account: client.account!,
 	})
-	const hashBids = await writeContract(client, {
+	await writeContractSync(client, {
 		address: config.Vif,
 		abi: VifAbi,
 		functionName: 'openMarket',
@@ -143,7 +124,7 @@ export async function openMarket(
 		// biome-ignore lint/style/noNonNullAssertion: test env
 		account: client.account!,
 	})
-	const hashReader = await writeContract(client, {
+	await writeContractSync(client, {
 		address: config.VifReader,
 		abi: VifReaderAbi,
 		functionName: 'updateMarkets',
@@ -158,11 +139,6 @@ export async function openMarket(
 		// biome-ignore lint/style/noNonNullAssertion: test env
 		account: client.account!,
 	})
-	await Promise.all([
-		waitForTransactionReceipt(client, { hash: hashAsks }),
-		waitForTransactionReceipt(client, { hash: hashBids }),
-		waitForTransactionReceipt(client, { hash: hashReader }),
-	])
 	return Market.create({
 		base,
 		quote,
@@ -201,7 +177,7 @@ export async function createOffer(
 
 	await approveIfNeeded(client, [gives.token], config.Vif)
 
-	const hash = await writeContract(client, {
+	const receipt = await writeContractSync(client, {
 		address: config.VifRouter,
 		abi: VifRouterAbi,
 		functionName: 'execute',
@@ -211,7 +187,6 @@ export async function createOffer(
 		// biome-ignore lint/style/noNonNullAssertion: test env
 		account: client.account!,
 	})
-	const receipt = await waitForTransactionReceipt(client, { hash })
 	const [lo] = actions.parseLogs(receipt.logs)
 
 	if (!lo) throw new Error('Limit order not found')
@@ -278,7 +253,7 @@ export async function createOffers(
 
 	const { commands, args } = actions.txData()
 
-	const hash = await writeContract(client, {
+	const receipt = await writeContractSync(client, {
 		address: config.VifRouter,
 		abi: VifRouterAbi,
 		functionName: 'execute',
@@ -288,7 +263,6 @@ export async function createOffers(
 		account: client.account!,
 		value: totalProvision.amount,
 	})
-	const receipt = await waitForTransactionReceipt(client, { hash })
 	const results = actions.parseLogs(receipt.logs)
 	return multicall(client, {
 		contracts: offers.map(
@@ -349,7 +323,7 @@ export async function marketOrder(
 		})
 		.build()
 	const { commands, args } = actions.txData()
-	const hash = await writeContract(client, {
+	const receipt = await writeContractSync(client, {
 		address: config.VifRouter,
 		abi: VifRouterAbi,
 		functionName: 'execute',
@@ -358,8 +332,6 @@ export async function marketOrder(
 		// biome-ignore lint/style/noNonNullAssertion: test env
 		account: client.account!,
 	})
-
-	const receipt = await waitForTransactionReceipt(client, { hash })
 	const results = actions.parseLogs(receipt.logs)
 	// biome-ignore lint/style/noNonNullAssertion: result is defined
 	return results[0]!
