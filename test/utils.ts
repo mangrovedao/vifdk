@@ -1,5 +1,5 @@
 import { expect } from 'bun:test'
-import { createWalletClient, publicActions, testActions } from 'viem'
+import { createWalletClient, http, publicActions, testActions } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import { anvil } from 'viem/chains'
 import { ipc } from 'viem/node'
@@ -22,7 +22,7 @@ export function mainClient() {
 	}
 	const client = createWalletClient({
 		account: mnemonicToAccount(MNEMONIC),
-		transport: ipc(IPC),
+		transport: http(`http://localhost:${PORT}`),
 		chain: anvil,
 		pollingInterval: 1,
 	})
@@ -34,7 +34,7 @@ export function mainClient() {
 export function baseClient() {
 	const client = createWalletClient({
 		account: mnemonicToAccount(MNEMONIC),
-		transport: ipc(BASE_IPC),
+		transport: http(`http://localhost:${BASE_PORT}`),
 		chain: anvil,
 		pollingInterval: 1,
 	})
