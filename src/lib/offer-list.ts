@@ -17,6 +17,7 @@ export type OfferListSimulationParams = {
 	provision?: TokenAmount | undefined
 }
 
+/** Represents an offer list */
 export class OfferList {
 	private constructor(
 		/** The offers in the list */
@@ -28,7 +29,9 @@ export class OfferList {
 	/**
 	 * Creates an offer list from a semi market
 	 * @param market - The semi market attached to the offer list
-	 * @returns The offer list
+	 * @returns An empty offer list
+	 * @example
+	 * const offerList = OfferList.fromSemiMarket(config.market.asks)
 	 */
 	static fromSemiMarket(market: SemiMarket): OfferList {
 		return new OfferList([], market)
@@ -41,6 +44,12 @@ export class OfferList {
 	 * @param packedOffers - The packed offers
 	 * @param owners - The owners of the offers
 	 * @returns The offer list
+	 * @example
+	 * const  [, offerIds, offersPacked, owners] = await client.readContract({
+	 * 	address: config.VifReader,
+	 * 	...packedOfferList(market.asks),
+	 * })
+	 * const offerList = OfferList.fromPacked(market.asks, offerIds, offersPacked, owners)
 	 */
 	static fromPacked(
 		market: SemiMarket,
@@ -80,6 +89,11 @@ export class OfferList {
 	 * Simulates an order on the offer list
 	 * @param params - The simulation parameters
 	 * @returns The simulation result
+	 * @example
+	 * const { gave, got, fee, bounty } = offerList.simulateOrder({
+	 * 	amount: config.market.base.token.amount('1'),
+	 * 	maxTick: config.market.asks.price(3500),
+	 * })
 	 */
 	simulateOrder(params: OfferListSimulationParams): OrderResult {
 		return simulate({

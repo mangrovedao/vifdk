@@ -55,17 +55,24 @@ export type CreateMarketArg = {
 	bidsFees?: number
 }
 
+/** Represents a market */
 export class Market {
+	/** The fee denominator */
 	static readonly FEE_DENOMINATOR = 1_000_000n
 
+	/** The asks semi market (makers sell base, takers buy base) */
 	public readonly asks: SemiMarket
+	/** The bids semi market (makers buy base, takers sell base) */
 	public readonly bids: SemiMarket
 
-	/** The key for the market */
+	/** The key for the asks semi market */
 	private _asksKey: Hex | null = null
+	/** The key for the bids semi market */
 	private _bidsKey: Hex | null = null
 
+	/** The ask fees for the market */
 	private _askFees: number | undefined = undefined
+	/** The bid fees for the market */
 	private _bidsFees: number | undefined = undefined
 
 	/** The ask fees for the market */
@@ -215,6 +222,15 @@ export class Market {
 	 * Creates a single or multiple markets
 	 * @param params - Params for the creation of either one market or multiple markets
 	 * @returns The market
+	 * @dev This function creates a single or multiple markets
+	 * @example
+	 * const market = Market.create({
+	 * 	base: Token.from(zeroAddress, 18, "ETH", 1n),
+	 * 	quote: Token.from(zeroAddress, 18, "USDC", 1n),
+	 * 	tickSpacing: 100n,
+	 * 	askFees: 1000,
+	 * 	bidsFees: 1000,
+	 * })
 	 */
 	static create<
 		TArgs extends CreateMarketArg | CreateMarketArg[] =

@@ -82,7 +82,7 @@ const baseABI = {
 } as const
 
 /** ABI for the openMarkets function on VifReader contract */
-export const openMarketsABI: [
+export const OPEN_MARKETS_ABI: [
 	typeof baseABI,
 	Omit<typeof baseABI, 'inputs'> & { inputs: readonly [] },
 ] = [
@@ -103,11 +103,11 @@ export function openMarkets(
 	from?: number,
 	maxLength = 100,
 ): Omit<
-	ContractFunctionParameters<typeof openMarketsABI, 'view', 'openMarkets'>,
+	ContractFunctionParameters<typeof OPEN_MARKETS_ABI, 'view', 'openMarkets'>,
 	'address'
 > {
 	return {
-		abi: openMarketsABI,
+		abi: OPEN_MARKETS_ABI,
 		functionName: 'openMarkets',
 		args: from ? [BigInt(from), BigInt(maxLength)] : [],
 	}

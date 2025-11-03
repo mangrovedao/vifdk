@@ -5,7 +5,7 @@ import { Tick } from './tick'
 import { Token, type TokenAmount } from './token'
 import { mulDivUp } from './utils'
 
-type SimpleOfferData = {
+export type SimpleOfferData = {
 	/** The amount of tokens to give */
 	gives: TokenAmount
 	/** The tick to simulate on */
@@ -16,7 +16,7 @@ type SimpleOfferData = {
 	provision?: TokenAmount | undefined
 }
 
-type SimulationParams = {
+export type SimulationParams = {
 	/** The market to simulate on */
 	market: SemiMarket
 	/** The amount to simulate */

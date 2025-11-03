@@ -4,6 +4,7 @@ import { simulate } from './simulation'
 import { Tick } from './tick'
 import type { TokenAmount } from './token'
 
+/** The raw data of an element of the book */
 export type RawBookElement = {
 	/** The head offer id */
 	head: number
@@ -17,6 +18,7 @@ export type RawBookElement = {
 	index: number
 }
 
+/** Represents an element of the book */
 export type BookElement = {
 	/** The head offer id */
 	head: number
@@ -30,6 +32,7 @@ export type BookElement = {
 	tick: Tick
 }
 
+/** Represents a book (price points without offer details) */
 export class Book {
 	constructor(
 		/** The elements of the book */
@@ -43,6 +46,13 @@ export class Book {
 	 * @param market - The semi market attached to the book
 	 * @param packed - The packed book elements
 	 * @returns The book
+	 * @dev This function creates a book from packed elements
+	 * @example
+	 * const elements = await client.readContract({
+	 * 	address: config.VifReader,
+	 * 	...packedBook(market.asks),
+	 * })
+	 * const book = Book.fromPacked(market.asks, elements)
 	 */
 	static fromPacked(
 		market: SemiMarket,

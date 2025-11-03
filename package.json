@@ -8,10 +8,67 @@
 	],
 	"module": "./dist/index.js",
 	"main": "./dist/index.cjs",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"require": "./dist/index.cjs"
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./router": {
+			"import": {
+				"types": "./dist/router/index.d.ts",
+				"default": "./dist/router/index.js"
+			},
+			"require": {
+				"types": "./dist/router/index.d.cts",
+				"default": "./dist/router/index.cjs"
+			}
+		},
+		"./builder/router": {
+			"import": {
+				"types": "./dist/builder/router/index.d.ts",
+				"default": "./dist/builder/router/index.js"
+			},
+			"require": {
+				"types": "./dist/builder/router/index.d.cts",
+				"default": "./dist/builder/router/index.cjs"
+			}
+		},
+		"./builder/core": {
+			"import": {
+				"types": "./dist/builder/core/index.d.ts",
+				"default": "./dist/builder/core/index.js"
+			},
+			"require": {
+				"types": "./dist/builder/core/index.d.cts",
+				"default": "./dist/builder/core/index.cjs"
+			}
+		},
+		"./builder/reader": {
+			"import": {
+				"types": "./dist/builder/reader/index.d.ts",
+				"default": "./dist/builder/reader/index.js"
+			},
+			"require": {
+				"types": "./dist/builder/reader/index.d.cts",
+				"default": "./dist/builder/reader/index.cjs"
+			}
+		},
+		"./lib": {
+			"import": {
+				"types": "./dist/lib/index.d.ts",
+				"default": "./dist/lib/index.js"
+			},
+			"require": {
+				"types": "./dist/lib/index.d.cts",
+				"default": "./dist/lib/index.cjs"
+			}
 		},
 		"./actions/router": {
 			"import": {
@@ -35,8 +92,8 @@
 		"url": "git+https://github.com/mangrovedao/vifdk.git"
 	},
 	"scripts": {
-		"build": "bunup 'src/**/index.ts' --format esm,cjs --exports",
-		"dev": "bunup 'src/**/index.ts' --format esm,cjs --exports",
+		"build": "bunup",
+		"dev": "bunup --watch",
 		"postinstall": "bun simple-git-hooks",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
