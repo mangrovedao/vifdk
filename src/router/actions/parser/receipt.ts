@@ -1,5 +1,5 @@
 import { type Log, parseEventLogs } from 'viem'
-import { Token } from '../../../lib'
+import { Token } from '../../../lib/export'
 import { Action } from '../enum'
 import { VifEventsABI } from '../events'
 import type {

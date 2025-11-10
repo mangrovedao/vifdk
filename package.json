@@ -20,16 +20,6 @@
 				"default": "./dist/index.cjs"
 			}
 		},
-		"./router": {
-			"import": {
-				"types": "./dist/router/index.d.ts",
-				"default": "./dist/router/index.js"
-			},
-			"require": {
-				"types": "./dist/router/index.d.cts",
-				"default": "./dist/router/index.cjs"
-			}
-		},
 		"./builder/router": {
 			"import": {
 				"types": "./dist/builder/router/index.d.ts",
@@ -58,16 +48,6 @@
 			"require": {
 				"types": "./dist/builder/reader/index.d.cts",
 				"default": "./dist/builder/reader/index.cjs"
-			}
-		},
-		"./lib": {
-			"import": {
-				"types": "./dist/lib/index.d.ts",
-				"default": "./dist/lib/index.js"
-			},
-			"require": {
-				"types": "./dist/lib/index.d.cts",
-				"default": "./dist/lib/index.cjs"
 			}
 		},
 		"./actions/router": {

@@ -1,5 +1,5 @@
 import { decodeAbiParameters, type Hex } from 'viem'
-import { Token } from '../../../lib'
+import { Token } from '../../../lib/export'
 import { ACTION_LABELS, Action, isFailableAction } from '../enum'
 import { FailedActionError } from '../errors'
 import type {

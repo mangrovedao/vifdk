@@ -13,7 +13,7 @@ export type {
 	OfferData,
 	SimpleOfferData,
 	SimulationParams,
-} from './lib'
+} from './lib/export'
 
 export {
 	Book,
@@ -34,7 +34,7 @@ export {
 	TokenAmount,
 	Token,
 	BitsOverflowError,
-} from './lib'
+} from './lib/export'
 
 // router
 
@@ -68,7 +68,7 @@ export type {
 	ActionsResult,
 	ActionsResultFromReceipt,
 	ExtendActions,
-} from './router'
+} from './router/export'
 
 export {
 	VifRouter,
@@ -78,4 +78,4 @@ export {
 	FailedActionError,
 	InvalidPathMultiOrderError,
 	InvalidTokenError,
-} from './router'
+} from './router/export'
