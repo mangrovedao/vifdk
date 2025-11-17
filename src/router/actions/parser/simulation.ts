@@ -38,9 +38,9 @@ export function parseSingleActionSimulationResultOrderSingle(
 		result,
 	)[0]
 	return {
-		gave: market.inboundToken.amount(res.gave),
-		got: market.outboundToken.amount(res.got),
-		fee: market.inboundToken.withUnit(1n).amount(res.fee),
+		gave: market.inboundToken.token.amount(res.gave),
+		got: market.outboundToken.token.amount(res.got),
+		fee: market.inboundToken.token.withUnit(1n).amount(res.fee),
 		bounty: Token.NATIVE_TOKEN.amount(res.bounty),
 	}
 }
@@ -72,8 +72,8 @@ export function parseSingleActionSimulationResultOrderMulti(
 		throw new Error('Invalid markets')
 	}
 	const amount = markets.fillWants
-		? sendToken.amount(res.amount)
-		: receiveToken.amount(res.amount)
+		? sendToken.token.amount(res.amount)
+		: receiveToken.token.amount(res.amount)
 	return {
 		amount,
 	}
@@ -105,8 +105,8 @@ export function parseSingleActionSimulationResultClaimCancel(
 		result,
 	)[0]
 	return {
-		inbound: market.inboundToken.amount(res.inbound),
-		outbound: market.outboundToken.amount(res.outbound),
+		inbound: market.inboundToken.token.amount(res.inbound),
+		outbound: market.outboundToken.token.amount(res.outbound),
 		provision: Token.NATIVE_TOKEN.amount(res.provision),
 	}
 }
@@ -137,7 +137,7 @@ export function parseSingleActionSimulationResultLimitSingle(
 	)[0]
 	return {
 		offerId: res.offerId,
-		claimedReceived: market.inboundToken.amount(res.claimedReceived),
+		claimedReceived: market.inboundToken.token.amount(res.claimedReceived),
 	}
 }
 

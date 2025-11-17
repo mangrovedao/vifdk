@@ -461,10 +461,8 @@ export class SemiMarket {
 	 * @dev In the context of a market order, this is the bought token
 	 * @returns The outbound token on the semi market
 	 */
-	get outboundToken(): Token {
-		return this.ba === BA.ASKS
-			? this.market.base.token
-			: this.market.quote.token
+	get outboundToken(): TokenAmount {
+		return this.ba === BA.ASKS ? this.market.base : this.market.quote
 	}
 
 	/**
@@ -472,10 +470,8 @@ export class SemiMarket {
 	 * @dev In the context of a market order, this is the sold token
 	 * @returns The inbound token on the semi market
 	 */
-	get inboundToken(): Token {
-		return this.ba === BA.ASKS
-			? this.market.quote.token
-			: this.market.base.token
+	get inboundToken(): TokenAmount {
+		return this.ba === BA.ASKS ? this.market.quote : this.market.base
 	}
 
 	constructor(

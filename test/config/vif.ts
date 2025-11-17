@@ -297,7 +297,9 @@ export async function marketOrder(
 	market: SemiMarket,
 	amount: TokenAmount,
 ): Promise<OrderResult> {
-	if (!isAddressEqual(amount.token.address, market.inboundToken.address)) {
+	if (
+		!isAddressEqual(amount.token.address, market.inboundToken.token.address)
+	) {
 		throw new Error('Amount token does not match market inbound token')
 	}
 	await mint(client, amount)
@@ -314,7 +316,7 @@ export async function marketOrder(
 		.takeAll({
 			// biome-ignore lint/style/noNonNullAssertion: test env
 			receiver: client.account!.address,
-			token: market.outboundToken,
+			token: market.outboundToken.token,
 		})
 		.takeAll({
 			// biome-ignore lint/style/noNonNullAssertion: test env

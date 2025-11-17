@@ -73,8 +73,8 @@ export class Book {
 			.sort((a, b) => a.index - b.index)
 			.map<BookElement>((e) => ({
 				...e,
-				totalGives: this.market.outboundToken.amount(
-					e.totalGives * this.market.outboundToken.unit,
+				totalGives: this.market.outboundToken.token.amount(
+					e.totalGives * this.market.outboundToken.token.unit,
 				),
 				tick: Tick.fromIndex(e.index, this.market.market.tickSpacing),
 			}))

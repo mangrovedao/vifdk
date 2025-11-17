@@ -127,11 +127,11 @@ export class Offer {
 			market,
 			{
 				...data,
-				gives: market.outboundToken.amount(
-					data.gives * market.outboundToken.unit,
+				gives: market.outboundToken.token.amount(
+					data.gives * market.outboundToken.token.unit,
 				),
-				received: market.inboundToken.amount(
-					data.received * market.inboundToken.unit,
+				received: market.inboundToken.token.amount(
+					data.received * market.inboundToken.token.unit,
 				),
 				tick: Tick.fromValue(data.tick, market.market.tickSpacing),
 				provision: Token.PROVISION_TOKEN.amount(

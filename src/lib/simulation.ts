@@ -45,9 +45,9 @@ function _simulateExactIn({
 	provision = Token.PROVISION_TOKEN.amount(0n),
 }: SimulationParams): OrderResult {
 	const result: OrderResult = {
-		gave: market.inboundToken.amount(0n),
-		got: market.outboundToken.amount(0n),
-		fee: market.inboundToken.withUnit(1n).amount(0n),
+		gave: market.inboundToken.token.amount(0n),
+		got: market.outboundToken.token.amount(0n),
+		fee: market.inboundToken.token.withUnit(1n).amount(0n),
 		bounty: Token.PROVISION_TOKEN.amount(0n),
 	}
 
@@ -58,7 +58,7 @@ function _simulateExactIn({
 		if (offer.tick.value > maxTick.value) break
 		const wants = offer.tick.inboundFromOutbound(
 			offer.gives,
-			market.inboundToken,
+			market.inboundToken.token,
 		)
 		if (offer.expiry && date >= offer.expiry) {
 			const fromOffer = offer.provision?.amount ?? 0n
@@ -101,9 +101,9 @@ function _simulateExactOut({
 	provision = Token.PROVISION_TOKEN.amount(0n),
 }: SimulationParams): OrderResult {
 	const result: OrderResult = {
-		gave: market.inboundToken.amount(0n),
-		got: market.outboundToken.amount(0n),
-		fee: market.inboundToken.withUnit(1n).amount(0n),
+		gave: market.inboundToken.token.amount(0n),
+		got: market.outboundToken.token.amount(0n),
+		fee: market.inboundToken.token.withUnit(1n).amount(0n),
 		bounty: Token.PROVISION_TOKEN.amount(0n),
 	}
 
@@ -120,7 +120,7 @@ function _simulateExactOut({
 		}
 		const wants = offer.tick.inboundFromOutbound(
 			offer.gives,
-			market.inboundToken,
+			market.inboundToken.token,
 		)
 		if (amount.amount >= offer.gives.amount) {
 			// using full amount here since using normalized wil have no impact
@@ -149,13 +149,13 @@ function _simulateExactOut({
  * @returns The simulation result
  */
 export function simulate(params: SimulationParams): OrderResult {
-	if (params.amount.token.equals(params.market.inboundToken)) {
+	if (params.amount.token.equals(params.market.inboundToken.token)) {
 		return _simulateExactIn(params)
-	} else if (params.amount.token.equals(params.market.outboundToken)) {
+	} else if (params.amount.token.equals(params.market.outboundToken.token)) {
 		return _simulateExactOut(params)
 	}
 	throw new InvalidTokenError(params.amount.token, [
-		params.market.inboundToken,
-		params.market.outboundToken,
+		params.market.inboundToken.token,
+		params.market.outboundToken.token,
 	])
 }
