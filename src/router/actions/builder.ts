@@ -134,26 +134,39 @@ export class VifRouterActionsBuilder<
 		}
 
 		// set fill wants and check the correctness of the fill volume token
-		const fillWants = fillVolume.token.equals(receiveToken)
-		if (!fillWants && !fillVolume.token.equals(sendToken)) {
-			throw new InvalidTokenError(fillVolume.token, [sendToken, receiveToken])
+		const fillWants = fillVolume.token.equals(receiveToken.token)
+		if (!fillWants && !fillVolume.token.equals(sendToken.token)) {
+			throw new InvalidTokenError(fillVolume.token, [
+				sendToken.token,
+				receiveToken.token,
+			])
 		}
 
 		// Set default limit volume and check the token
 		limitVolume =
 			limitVolume ??
-			(fillWants ? sendToken.amount(maxUint256) : receiveToken.amount(0n))
+			(fillWants
+				? sendToken.token.amount(maxUint256)
+				: receiveToken.token.amount(0n))
 		if (
-			(fillWants && !limitVolume.token.equals(sendToken)) ||
-			(!fillWants && !limitVolume.token.equals(receiveToken))
+			(fillWants && !limitVolume.token.equals(sendToken.token)) ||
+			(!fillWants && !limitVolume.token.equals(receiveToken.token))
 		) {
-			throw new InvalidTokenError(limitVolume.token, [sendToken, receiveToken])
+			throw new InvalidTokenError(limitVolume.token, [
+				sendToken.token,
+				receiveToken.token,
+			])
 		}
 
 		// check the path is correct
 		let prevToken = sendToken
 		for (const market of markets) {
-			if (!isAddressEqual(market.inboundToken.address, prevToken.address)) {
+			if (
+				!isAddressEqual(
+					market.inboundToken.token.address,
+					prevToken.token.address,
+				)
+			) {
 				throw new InvalidPathMultiOrderError(markets)
 			}
 			prevToken = market.outboundToken
@@ -209,8 +222,8 @@ export class VifRouterActionsBuilder<
 		}
 
 		// check if the sell token is valid
-		if (!market.outboundToken.equals(gives.token)) {
-			throw new InvalidTokenError(gives.token, [market.outboundToken])
+		if (!market.outboundToken.token.equals(gives.token)) {
+			throw new InvalidTokenError(gives.token, [market.outboundToken.token])
 		}
 
 		this.actions.push({

@@ -50,17 +50,20 @@ export class InvalidPathMultiOrderError extends Error {
 		}
 
 		const prevToken = firstMarket.outboundToken
-		let pathString = firstMarket.inboundToken.symbol // WETH
+		let pathString = firstMarket.inboundToken.token.symbol // WETH
 		for (const [i, currentPath] of path.entries()) {
 			if (
-				!isAddressEqual(currentPath.inboundToken.address, prevToken.address)
+				!isAddressEqual(
+					currentPath.inboundToken.token.address,
+					prevToken.token.address,
+				)
 			) {
-				pathString += ` -> [${prevToken.symbol} != ${currentPath.inboundToken.symbol}]`
+				pathString += ` -> [${prevToken.token.symbol} != ${currentPath.inboundToken.token.symbol}]`
 			} else {
-				pathString += ` -> ${currentPath.inboundToken.symbol}`
+				pathString += ` -> ${currentPath.inboundToken.token.symbol}`
 			}
 			if (i === path.length - 1) {
-				pathString += ` -> ${currentPath.outboundToken.symbol}`
+				pathString += ` -> ${currentPath.outboundToken.token.symbol}`
 			}
 		}
 		super(

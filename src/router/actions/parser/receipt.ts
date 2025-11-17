@@ -79,15 +79,15 @@ export function createMultiOrderResult(
 		throw new Error('Invalid markets')
 	}
 	return {
-		gave: startToken.amount(0n),
-		got: endToken.amount(0n),
-		fee: startToken.withUnit(1n).amount(0n),
+		gave: startToken.token.amount(0n),
+		got: endToken.token.amount(0n),
+		fee: startToken.token.withUnit(1n).amount(0n),
 		bounty: Token.NATIVE_TOKEN.amount(0n),
 		hops: action.metadata.markets.map((market) => ({
 			market,
-			gave: market.inboundToken.amount(0n),
-			got: market.outboundToken.amount(0n),
-			fee: market.inboundToken.withUnit(1n).amount(0n),
+			gave: market.inboundToken.token.amount(0n),
+			got: market.outboundToken.token.amount(0n),
+			fee: market.inboundToken.token.withUnit(1n).amount(0n),
 			bounty: Token.NATIVE_TOKEN.amount(0n),
 			seen: false,
 		})),
@@ -126,9 +126,9 @@ export function parseFromLogs<
 						if (results[i] !== undefined) continue
 						if (action.metadata.key !== event.args.market) continue
 						results[i] = {
-							gave: action.metadata.inboundToken.amount(event.args.gave),
-							got: action.metadata.outboundToken.amount(event.args.got),
-							fee: action.metadata.inboundToken
+							gave: action.metadata.inboundToken.token.amount(event.args.gave),
+							got: action.metadata.outboundToken.token.amount(event.args.got),
+							fee: action.metadata.inboundToken.token
 								.withUnit(1n)
 								.amount(event.args.fee),
 							bounty: Token.NATIVE_TOKEN.amount(event.args.bounty),
@@ -198,7 +198,7 @@ export function parseFromLogs<
 						continue
 					results[i] = {
 						offerId: event.args.offerId,
-						claimedReceived: action.metadata.market.inboundToken.amount(
+						claimedReceived: action.metadata.market.inboundToken.token.amount(
 							'claimedReceived' in event.args ? event.args.claimedReceived : 0n,
 						),
 					} satisfies ActionResultFromReceipt<
@@ -222,10 +222,10 @@ export function parseFromLogs<
 					)
 						continue
 					results[i] = {
-						inbound: action.metadata.market.inboundToken.amount(
+						inbound: action.metadata.market.inboundToken.token.amount(
 							event.args.inbound,
 						),
-						outbound: action.metadata.market.outboundToken.amount(
+						outbound: action.metadata.market.outboundToken.token.amount(
 							event.args.outbound,
 						),
 						provision: Token.NATIVE_TOKEN.amount(event.args.provision),
