@@ -20,7 +20,7 @@ import type {
 export function parseSingleActionSimulationResultOrderSingle(
 	element: ActionElement<ActionOrFailable<Action.ORDER_SINGLE>>,
 	result: Hex,
-): RawActionResult<Action.ORDER_SINGLE> {
+): RawActionResult<ActionOrFailable<Action.ORDER_SINGLE>> {
 	const market = element.metadata
 	const res = decodeAbiParameters(
 		[
@@ -38,10 +38,13 @@ export function parseSingleActionSimulationResultOrderSingle(
 		result,
 	)[0]
 	return {
-		gave: market.inboundToken.token.amount(res.gave),
-		got: market.outboundToken.token.amount(res.got),
-		fee: market.inboundToken.token.withUnit(1n).amount(res.fee),
-		bounty: Token.NATIVE_TOKEN.amount(res.bounty),
+		type: element.action,
+		data: {
+			gave: market.inboundToken.token.amount(res.gave),
+			got: market.outboundToken.token.amount(res.got),
+			fee: market.inboundToken.token.withUnit(1n).amount(res.fee),
+			bounty: Token.NATIVE_TOKEN.amount(res.bounty),
+		},
 	}
 }
 
@@ -54,7 +57,7 @@ export function parseSingleActionSimulationResultOrderSingle(
 export function parseSingleActionSimulationResultOrderMulti(
 	element: ActionElement<ActionOrFailable<Action.ORDER_MULTI>>,
 	result: Hex,
-): RawActionResult<Action.ORDER_MULTI> {
+): RawActionResult<ActionOrFailable<Action.ORDER_MULTI>> {
 	const markets = element.metadata
 	const res = decodeAbiParameters(
 		[
@@ -75,7 +78,10 @@ export function parseSingleActionSimulationResultOrderMulti(
 		? sendToken.token.amount(res.amount)
 		: receiveToken.token.amount(res.amount)
 	return {
-		amount,
+		type: element.action,
+		data: {
+			amount,
+		},
 	}
 }
 
@@ -88,7 +94,7 @@ export function parseSingleActionSimulationResultOrderMulti(
 export function parseSingleActionSimulationResultClaimCancel(
 	element: ActionElement<ActionOrFailable<Action.CLAIM | Action.CANCEL>>,
 	result: Hex,
-): RawActionResult<Action.CLAIM | Action.CANCEL> {
+): RawActionResult<ActionOrFailable<Action.CLAIM | Action.CANCEL>> {
 	const { market } = element.metadata
 	const res = decodeAbiParameters(
 		[
@@ -105,9 +111,12 @@ export function parseSingleActionSimulationResultClaimCancel(
 		result,
 	)[0]
 	return {
-		inbound: market.inboundToken.token.amount(res.inbound),
-		outbound: market.outboundToken.token.amount(res.outbound),
-		provision: Token.NATIVE_TOKEN.amount(res.provision),
+		type: element.action,
+		data: {
+			inbound: market.inboundToken.token.amount(res.inbound),
+			outbound: market.outboundToken.token.amount(res.outbound),
+			provision: Token.NATIVE_TOKEN.amount(res.provision),
+		},
 	}
 }
 
@@ -120,7 +129,7 @@ export function parseSingleActionSimulationResultClaimCancel(
 export function parseSingleActionSimulationResultLimitSingle(
 	element: ActionElement<ActionOrFailable<Action.LIMIT_SINGLE>>,
 	result: Hex,
-): RawActionResult<Action.LIMIT_SINGLE> {
+): RawActionResult<ActionOrFailable<Action.LIMIT_SINGLE>> {
 	const { market } = element.metadata
 	const res = decodeAbiParameters(
 		[
@@ -136,8 +145,11 @@ export function parseSingleActionSimulationResultLimitSingle(
 		result,
 	)[0]
 	return {
-		offerId: res.offerId,
-		claimedReceived: market.inboundToken.token.amount(res.claimedReceived),
+		type: element.action,
+		data: {
+			offerId: res.offerId,
+			claimedReceived: market.inboundToken.token.amount(res.claimedReceived),
+		},
 	}
 }
 
@@ -186,7 +198,10 @@ export function parseSingleActionSimulationResultSuccess<
 				result,
 			) as RawActionResult<TAction>
 		default:
-			return undefined as RawActionResult<TAction>
+			return {
+				type: element.action,
+				data: undefined,
+			} as RawActionResult<TAction>
 	}
 }
 

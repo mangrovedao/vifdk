@@ -84,7 +84,7 @@ describe('Book', () => {
 		// biome-ignore lint/style/noNonNullAssertion: test env
 		const router = new VifRouter(config.VifRouter, config.Vif, client.chain!.id)
 		const actions = router
-			.createActions()
+			.createTypedActions()
 			.orderSingle({
 				market: config.market.asks,
 				fillVolume: amount,
@@ -105,8 +105,8 @@ describe('Book', () => {
 		})
 		const [res] = actions.parseSimulationResult(result)
 
-		expect(res.gave.amount).toBe(simulation.gave.amount)
-		expect(res.got.amount).toBe(simulation.got.amount)
-		expect(res.fee.amount).toBe(simulation.fee.amount)
+		expect(res.data.gave.amount).toBe(simulation.gave.amount)
+		expect(res.data.got.amount).toBe(simulation.got.amount)
+		expect(res.data.fee.amount).toBe(simulation.fee.amount)
 	})
 })

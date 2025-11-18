@@ -222,8 +222,8 @@ export type ActionOrFailable<TAction extends Action> =
 		? TAction | ToFailableAction<TAction>
 		: TAction
 
-export type RawActionResult<TAction> = TAction extends Action
-	? TAction extends ActionOrFailable<Action.ORDER_SINGLE>
+export type RawActionResultContent<TAction extends Action> =
+	TAction extends ActionOrFailable<Action.ORDER_SINGLE>
 		? OrderResult
 		: TAction extends ActionOrFailable<Action.ORDER_MULTI>
 			? MultiOrderResult
@@ -234,14 +234,25 @@ export type RawActionResult<TAction> = TAction extends Action
 				: TAction extends ActionOrFailable<Action.LIMIT_SINGLE>
 					? LimitOrderResult
 					: undefined
+
+export type RawActionResult<TAction> = TAction extends Action
+	? {
+			type: TAction
+			data: RawActionResultContent<TAction>
+		}
 	: never
 
+export type ActionResultFromReceiptContent<TAction extends Action> =
+	| (TAction extends ActionOrFailable<Action.ORDER_MULTI>
+			? MultiOrderResultFromReceipt
+			: RawActionResultContent<TAction>)
+	| undefined
+
 export type ActionResultFromReceipt<TAction> = TAction extends Action
-	?
-			| (TAction extends ActionOrFailable<Action.ORDER_MULTI>
-					? MultiOrderResultFromReceipt
-					: RawActionResult<TAction>)
-			| undefined
+	? {
+			type: TAction
+			data: ActionResultFromReceiptContent<TAction>
+		}
 	: never
 
 export type ActionToFailable = {
@@ -260,10 +271,19 @@ export type ActionToFailable = {
 }
 
 export type FailableActions = ActionToFailable[keyof ActionToFailable]
+export type NonFailableActions = Exclude<Action, FailableActions>
 
 export type ToFailableAction<TAction> = TAction extends keyof ActionToFailable
 	? ActionToFailable[TAction]
 	: never
+
+export type ToNonFailableAction<TAction> = TAction extends NonFailableActions
+	? TAction
+	: {
+			[K in keyof ActionToFailable]: ActionToFailable[K] extends TAction
+				? K
+				: never
+		}[keyof ActionToFailable]
 
 export type ActionResult<TAction> = TAction extends FailableActions
 	? FailableResult<RawActionResult<TAction>>
@@ -273,11 +293,13 @@ export type ActionsResult<
 	TActions extends readonly unknown[] = readonly Action[],
 > = TActions extends readonly []
 	? readonly []
-	: TActions extends readonly [infer TAction]
-		? [ActionResult<TAction>]
-		: TActions extends readonly [infer TAction, ...infer TRest]
-			? [ActionResult<TAction>, ...ActionsResult<TRest>]
-			: never
+	: TActions extends Action[]
+		? TActions extends readonly [infer TAction]
+			? [ActionResult<TAction>]
+			: TActions extends readonly [infer TAction, ...infer TRest]
+				? [ActionResult<TAction>, ...ActionsResult<TRest>]
+				: ActionResult<Action>[]
+		: never
 
 export type ActionsResultFromReceipt<
 	TActions extends readonly unknown[] = readonly Action[],
@@ -295,4 +317,6 @@ export type ExtendActions<
 	TActions extends readonly Action[],
 	TAction extends Action,
 	TCanFail extends boolean,
-> = [...TActions, TCanFail extends true ? ToFailableAction<TAction> : TAction]
+> = Action[] extends TActions
+	? Action[]
+	: [...TActions, TCanFail extends true ? ToFailableAction<TAction> : TAction]

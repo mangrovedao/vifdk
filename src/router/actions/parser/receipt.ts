@@ -116,16 +116,23 @@ export function parseFromLogs<
 		logs: logs,
 		abi: VifEventsABI,
 	})
-	const results = Array(actions.length).fill(undefined)
+	const results = actions.map(
+		(action) =>
+			({
+				type: action.action,
+				data: undefined,
+			}) as ActionResultFromReceipt<Action>,
+	)
 	for (const event of events) {
 		switch (event.eventName) {
 			case 'MarketOrder':
 				// single or multi order
 				for (const [i, action] of actions.entries()) {
 					if (isSingleOrderElement(action)) {
-						if (results[i] !== undefined) continue
+						if (results[i]?.data !== undefined) continue
 						if (action.metadata.key !== event.args.market) continue
-						results[i] = {
+						// biome-ignore lint/style/noNonNullAssertion: result is defined at this index
+						results[i]!.data = {
 							gave: action.metadata.inboundToken.token.amount(event.args.gave),
 							got: action.metadata.outboundToken.token.amount(event.args.got),
 							fee: action.metadata.inboundToken.token
@@ -134,7 +141,7 @@ export function parseFromLogs<
 							bounty: Token.NATIVE_TOKEN.amount(event.args.bounty),
 						} satisfies ActionResultFromReceipt<
 							ActionOrFailable<Action.ORDER_SINGLE>
-						>
+						>['data']
 						break
 					} else if (isMultiOrderElement(action)) {
 						if (
@@ -143,9 +150,9 @@ export function parseFromLogs<
 							)
 						)
 							continue
-						let res = results[i] as ActionResultFromReceipt<
+						let res = results[i]?.data as ActionResultFromReceipt<
 							ActionOrFailable<Action.ORDER_MULTI>
-						>
+						>['data']
 
 						res = res ?? createMultiOrderResult(action)
 
@@ -176,7 +183,8 @@ export function parseFromLogs<
 							hop.seen = true
 						}
 
-						results[i] = res
+						// biome-ignore lint/style/noNonNullAssertion: result is defined at this index
+						results[i]!.data = res
 						break
 					}
 				}
@@ -186,7 +194,7 @@ export function parseFromLogs<
 				// limit single
 				for (const [i, action] of actions.entries()) {
 					// if the result is already defined, it means a limit order was already processed
-					if (results[i] !== undefined) continue
+					if (results[i]?.data !== undefined) continue
 					// if the action is not a limit order, continue
 					if (!isLimitOrderElement(action)) continue
 					// if the limit order is not on the same market or is an update with a different offer id, continue
@@ -196,14 +204,15 @@ export function parseFromLogs<
 							action.metadata.offerId !== event.args.offerId)
 					)
 						continue
-					results[i] = {
+					// biome-ignore lint/style/noNonNullAssertion: result is defined at this index
+					results[i]!.data = {
 						offerId: event.args.offerId,
 						claimedReceived: action.metadata.market.inboundToken.token.amount(
 							'claimedReceived' in event.args ? event.args.claimedReceived : 0n,
 						),
 					} satisfies ActionResultFromReceipt<
 						ActionOrFailable<Action.LIMIT_SINGLE>
-					>
+					>['data']
 					break
 				}
 				break
@@ -212,7 +221,7 @@ export function parseFromLogs<
 				// cancel or claim
 				for (const [i, action] of actions.entries()) {
 					// if the result is already defined, it means a cancel was already processed
-					if (results[i] !== undefined) continue
+					if (results[i]?.data !== undefined) continue
 					// if the action is not a cancel, return false
 					if (!isCancelOrClaimElement(action)) continue
 					// if the cancel is not on the same market, same offer id, return false
@@ -221,7 +230,8 @@ export function parseFromLogs<
 						action.metadata.offerId !== event.args.offerId
 					)
 						continue
-					results[i] = {
+					// biome-ignore lint/style/noNonNullAssertion: result is defined at this index
+					results[i]!.data = {
 						inbound: action.metadata.market.inboundToken.token.amount(
 							event.args.inbound,
 						),
@@ -231,7 +241,7 @@ export function parseFromLogs<
 						provision: Token.NATIVE_TOKEN.amount(event.args.provision),
 					} satisfies ActionResultFromReceipt<
 						ActionOrFailable<Action.CANCEL | Action.CLAIM>
-					>
+					>['data']
 					break
 				}
 				break

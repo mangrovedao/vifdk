@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test'
+import { Action } from '../../src/router/actions/enum'
 import { VifRouter } from '../../src/router/router'
 import { mint } from '../config/mint'
 import { approveIfNeeded, config } from '../config/tokens'
@@ -28,7 +29,7 @@ describe('Market order', () => {
 		const router = new VifRouter(config.VifRouter, config.Vif, client.chain.id)
 
 		const actions = router
-			.createActions()
+			.createTypedActions()
 			.orderSingle({
 				market: config.market.asks,
 				fillVolume: amount,
@@ -57,13 +58,23 @@ describe('Market order', () => {
 		expect(parsedSimulationResult).toBeDefined()
 		expect(parsedSimulationResult.length).toBe(3)
 		expect(parsedSimulationResult[0]).toBeDefined()
-		expectCloseTo(parsedSimulationResult[0].gave.amount, excludingFees.amount)
-		expect(parsedSimulationResult[0].got.amount).toBeGreaterThan(0n)
-		expectCloseTo(parsedSimulationResult[0].fee.amount, fees.amount)
-		expect(parsedSimulationResult[0].bounty.amount).toBe(0n)
+		expect(parsedSimulationResult[0].type).toBe(Action.ORDER_SINGLE)
+		expect(parsedSimulationResult[0].data).toBeDefined()
+		expectCloseTo(
+			parsedSimulationResult[0].data.gave.amount,
+			excludingFees.amount,
+		)
+		expect(parsedSimulationResult[0].data.got.amount).toBeGreaterThan(0n)
+		expectCloseTo(parsedSimulationResult[0].data.fee.amount, fees.amount)
+		expect(parsedSimulationResult[0].data.bounty.amount).toBe(0n)
 
-		expect(parsedSimulationResult[1]).toBeUndefined()
-		expect(parsedSimulationResult[2]).toBeUndefined()
+		expect(parsedSimulationResult[1]).toBeDefined()
+		expect(parsedSimulationResult[1].type).toBe(Action.SETTLE_ALL)
+		expect(parsedSimulationResult[1].data).toBeUndefined()
+
+		expect(parsedSimulationResult[2]).toBeDefined()
+		expect(parsedSimulationResult[2].type).toBe(Action.TAKE_ALL)
+		expect(parsedSimulationResult[2].data).toBeUndefined()
 
 		const receipt = await client.writeContractSync(request)
 		const results = actions.parseLogs(receipt.logs)
@@ -71,13 +82,21 @@ describe('Market order', () => {
 		expect(results).toBeDefined()
 		expect(results.length).toBe(3)
 		expect(results[0]).toBeDefined()
+		expect(results[0].type).toBe(Action.ORDER_SINGLE)
+		expect(results[0].data).toBeDefined()
 		// biome-ignore lint/style/noNonNullAssertion: result is defined
-		expectCloseTo(results[0]!.gave.amount, excludingFees.amount)
-		expect(results[0]?.got.amount).toBeGreaterThan(0n)
+		expectCloseTo(results[0]!.data!.gave.amount, excludingFees.amount)
 		// biome-ignore lint/style/noNonNullAssertion: result is defined
-		expectCloseTo(results[0]!.fee.amount, fees.amount)
-		expect(results[0]?.bounty.amount).toBe(0n)
-		expect(results[1]).toBeUndefined()
-		expect(results[2]).toBeUndefined()
+		expect(results[0]!.data!.got.amount).toBeGreaterThan(0n)
+		// biome-ignore lint/style/noNonNullAssertion: result is defined
+		expectCloseTo(results[0]!.data!.fee.amount, fees.amount)
+		// biome-ignore lint/style/noNonNullAssertion: result is defined
+		expect(results[0]!.data!.bounty.amount).toBe(0n)
+		expect(results[1]).toBeDefined()
+		expect(results[1].type).toBe(Action.SETTLE_ALL)
+		expect(results[1].data).toBeUndefined()
+		expect(results[2]).toBeDefined()
+		expect(results[2].type).toBe(Action.TAKE_ALL)
+		expect(results[2].data).toBeUndefined()
 	})
 })
