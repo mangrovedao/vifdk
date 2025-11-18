@@ -8,7 +8,6 @@ import type {
 	ActionResult,
 	ActionsResult,
 	DispatchResult,
-	RawActionResult,
 } from '../types'
 
 /**
@@ -20,7 +19,7 @@ import type {
 export function parseSingleActionSimulationResultOrderSingle(
 	element: ActionElement<ActionOrFailable<Action.ORDER_SINGLE>>,
 	result: Hex,
-): RawActionResult<ActionOrFailable<Action.ORDER_SINGLE>> {
+): ActionResult<ActionOrFailable<Action.ORDER_SINGLE>> {
 	const market = element.metadata
 	const res = decodeAbiParameters(
 		[
@@ -45,6 +44,7 @@ export function parseSingleActionSimulationResultOrderSingle(
 			fee: market.inboundToken.token.withUnit(1n).amount(res.fee),
 			bounty: Token.NATIVE_TOKEN.amount(res.bounty),
 		},
+		success: true,
 	}
 }
 
@@ -57,7 +57,7 @@ export function parseSingleActionSimulationResultOrderSingle(
 export function parseSingleActionSimulationResultOrderMulti(
 	element: ActionElement<ActionOrFailable<Action.ORDER_MULTI>>,
 	result: Hex,
-): RawActionResult<ActionOrFailable<Action.ORDER_MULTI>> {
+): ActionResult<ActionOrFailable<Action.ORDER_MULTI>> {
 	const markets = element.metadata
 	const res = decodeAbiParameters(
 		[
@@ -82,6 +82,7 @@ export function parseSingleActionSimulationResultOrderMulti(
 		data: {
 			amount,
 		},
+		success: true,
 	}
 }
 
@@ -94,7 +95,7 @@ export function parseSingleActionSimulationResultOrderMulti(
 export function parseSingleActionSimulationResultClaimCancel(
 	element: ActionElement<ActionOrFailable<Action.CLAIM | Action.CANCEL>>,
 	result: Hex,
-): RawActionResult<ActionOrFailable<Action.CLAIM | Action.CANCEL>> {
+): ActionResult<ActionOrFailable<Action.CLAIM | Action.CANCEL>> {
 	const { market } = element.metadata
 	const res = decodeAbiParameters(
 		[
@@ -117,6 +118,7 @@ export function parseSingleActionSimulationResultClaimCancel(
 			outbound: market.outboundToken.token.amount(res.outbound),
 			provision: Token.NATIVE_TOKEN.amount(res.provision),
 		},
+		success: true,
 	}
 }
 
@@ -129,7 +131,7 @@ export function parseSingleActionSimulationResultClaimCancel(
 export function parseSingleActionSimulationResultLimitSingle(
 	element: ActionElement<ActionOrFailable<Action.LIMIT_SINGLE>>,
 	result: Hex,
-): RawActionResult<ActionOrFailable<Action.LIMIT_SINGLE>> {
+): ActionResult<ActionOrFailable<Action.LIMIT_SINGLE>> {
 	const { market } = element.metadata
 	const res = decodeAbiParameters(
 		[
@@ -150,6 +152,7 @@ export function parseSingleActionSimulationResultLimitSingle(
 			offerId: res.offerId,
 			claimedReceived: market.inboundToken.token.amount(res.claimedReceived),
 		},
+		success: true,
 	}
 }
 
@@ -161,19 +164,19 @@ export function parseSingleActionSimulationResultLimitSingle(
  */
 export function parseSingleActionSimulationResultSuccess<
 	TAction extends Action,
->(element: ActionElement<TAction>, result: Hex): RawActionResult<TAction> {
+>(element: ActionElement<TAction>, result: Hex): ActionResult<TAction> {
 	switch (element.action) {
 		case Action.ORDER_SINGLE:
 		case Action.FAILABLE_ORDER_SINGLE:
 			return parseSingleActionSimulationResultOrderSingle(
 				element as ActionElement<ActionOrFailable<Action.ORDER_SINGLE>>,
 				result,
-			) as RawActionResult<TAction>
+			) as ActionResult<TAction>
 		case Action.ORDER_MULTI:
 			return parseSingleActionSimulationResultOrderMulti(
 				element as ActionElement<ActionOrFailable<Action.ORDER_MULTI>>,
 				result,
-			) as RawActionResult<TAction>
+			) as ActionResult<TAction>
 		case Action.CLAIM:
 		case Action.FAILABLE_CLAIM:
 		case Action.CANCEL:
@@ -188,7 +191,7 @@ export function parseSingleActionSimulationResultSuccess<
 					>
 				>,
 				result,
-			) as RawActionResult<TAction>
+			) as ActionResult<TAction>
 		case Action.LIMIT_SINGLE:
 		case Action.FAILABLE_LIMIT_SINGLE:
 			return parseSingleActionSimulationResultLimitSingle(
@@ -196,12 +199,13 @@ export function parseSingleActionSimulationResultSuccess<
 					ActionOrFailable<Action.LIMIT_SINGLE | Action.FAILABLE_LIMIT_SINGLE>
 				>,
 				result,
-			) as RawActionResult<TAction>
+			) as ActionResult<TAction>
 		default:
 			return {
 				type: element.action,
 				data: undefined,
-			} as RawActionResult<TAction>
+				success: true,
+			} as ActionResult<TAction>
 	}
 }
 
@@ -224,19 +228,11 @@ export function parseSingleActionSimulationResult<TAction extends Action>(
 				result.returnData,
 				ACTION_LABELS[element.action],
 			),
+			type: element.action,
+			data: undefined,
 		} as ActionResult<TAction>
 	}
-	const res = parseSingleActionSimulationResultSuccess(
-		element,
-		result.returnData,
-	)
-	if (isFailable) {
-		return {
-			success: true,
-			result: res,
-		} as ActionResult<TAction>
-	}
-	return res as ActionResult<TAction>
+	return parseSingleActionSimulationResultSuccess(element, result.returnData)
 }
 
 /**

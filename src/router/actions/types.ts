@@ -194,18 +194,6 @@ export type ActionsStoredMetadata<
 			? [ActionStoredMetadata<TAction>, ...ActionsStoredMetadata<TRest>]
 			: never
 
-export type FailableResult<TResult> =
-	| {
-			success: true
-			result: TResult
-			error?: undefined
-	  }
-	| {
-			success: false
-			error: FailedActionError
-			result?: undefined
-	  }
-
 export type DispatchResult = {
 	success: boolean
 	returnData: Hex
@@ -235,24 +223,41 @@ export type RawActionResultContent<TAction extends Action> =
 					? LimitOrderResult
 					: undefined
 
-export type RawActionResult<TAction> = TAction extends Action
-	? {
-			type: TAction
-			data: RawActionResultContent<TAction>
-		}
+export type ActionResult<TAction> = TAction extends Action
+	?
+			| {
+					type: TAction
+					success: true
+					data: RawActionResultContent<TAction>
+					error?: undefined
+			  }
+			| (TAction extends FailableActions
+					? {
+							type: TAction
+							success: false
+							error: FailedActionError
+							data?: undefined
+						}
+					: never)
 	: never
 
 export type ActionResultFromReceiptContent<TAction extends Action> =
-	| (TAction extends ActionOrFailable<Action.ORDER_MULTI>
-			? MultiOrderResultFromReceipt
-			: RawActionResultContent<TAction>)
-	| undefined
+	TAction extends ActionOrFailable<Action.ORDER_MULTI>
+		? MultiOrderResultFromReceipt
+		: RawActionResultContent<TAction>
 
 export type ActionResultFromReceipt<TAction> = TAction extends Action
-	? {
-			type: TAction
-			data: ActionResultFromReceiptContent<TAction>
-		}
+	?
+			| {
+					type: TAction
+					data: ActionResultFromReceiptContent<TAction>
+					success: true
+			  }
+			| {
+					type: TAction
+					data?: undefined
+					success: false
+			  }
 	: never
 
 export type ActionToFailable = {
@@ -284,10 +289,6 @@ export type ToNonFailableAction<TAction> = TAction extends NonFailableActions
 				? K
 				: never
 		}[keyof ActionToFailable]
-
-export type ActionResult<TAction> = TAction extends FailableActions
-	? FailableResult<RawActionResult<TAction>>
-	: RawActionResult<TAction>
 
 export type ActionsResult<
 	TActions extends readonly unknown[] = readonly Action[],

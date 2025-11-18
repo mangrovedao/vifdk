@@ -47,30 +47,41 @@ describe('Limit order', () => {
 		})
 
 		const parsedSimulationResult = actions.parseSimulationResult(result)
+
 		expect(parsedSimulationResult).toBeDefined()
 		expect(parsedSimulationResult.length).toBe(5)
 
 		expect(parsedSimulationResult[0]).toBeDefined()
 		expect(parsedSimulationResult[0].type).toBe(Action.WRAP_NATIVE)
 		expect(parsedSimulationResult[0].data).toBeUndefined()
+		expect(parsedSimulationResult[0].success).toBeTrue()
+		expect(parsedSimulationResult[0].error).toBeUndefined()
 
 		expect(parsedSimulationResult[1]).toBeDefined()
 		expect(parsedSimulationResult[1].type).toBe(Action.LIMIT_SINGLE)
 		expect(parsedSimulationResult[1].data).toBeDefined()
 		expect(parsedSimulationResult[1].data.claimedReceived.amount).toBe(0n)
 		expect(parsedSimulationResult[1].data.offerId).toBe(1)
+		expect(parsedSimulationResult[1].success).toBeTrue()
+		expect(parsedSimulationResult[1].error).toBeUndefined()
 
 		expect(parsedSimulationResult[2]).toBeDefined()
 		expect(parsedSimulationResult[2].type).toBe(Action.SETTLE_ALL)
 		expect(parsedSimulationResult[2].data).toBeUndefined()
+		expect(parsedSimulationResult[2].success).toBeTrue()
+		expect(parsedSimulationResult[2].error).toBeUndefined()
 
 		expect(parsedSimulationResult[3]).toBeDefined()
 		expect(parsedSimulationResult[3].type).toBe(Action.SETTLE_ALL)
 		expect(parsedSimulationResult[3].data).toBeUndefined()
+		expect(parsedSimulationResult[3].success).toBeTrue()
+		expect(parsedSimulationResult[3].error).toBeUndefined()
 
 		expect(parsedSimulationResult[4]).toBeDefined()
 		expect(parsedSimulationResult[4].type).toBe(Action.SWEEP)
 		expect(parsedSimulationResult[4].data).toBeUndefined()
+		expect(parsedSimulationResult[4].success).toBeTrue()
+		expect(parsedSimulationResult[4].error).toBeUndefined()
 
 		const receipt = await client.writeContractSync(request)
 
@@ -82,22 +93,27 @@ describe('Limit order', () => {
 		expect(parsedReceipt[0]).toBeDefined()
 		expect(parsedReceipt[0].type).toBe(Action.WRAP_NATIVE)
 		expect(parsedReceipt[0].data).toBeUndefined()
+		expect(parsedReceipt[0].success).toBeTrue()
 
 		expect(parsedReceipt[2]).toBeDefined()
 		expect(parsedReceipt[2].type).toBe(Action.SETTLE_ALL)
 		expect(parsedReceipt[2].data).toBeUndefined()
+		expect(parsedReceipt[2].success).toBeTrue()
 
 		expect(parsedReceipt[3]).toBeDefined()
 		expect(parsedReceipt[3].type).toBe(Action.SETTLE_ALL)
 		expect(parsedReceipt[3].data).toBeUndefined()
+		expect(parsedReceipt[3].success).toBeTrue()
 
 		expect(parsedReceipt[4]).toBeDefined()
 		expect(parsedReceipt[4].type).toBe(Action.SWEEP)
 		expect(parsedReceipt[4].data).toBeUndefined()
+		expect(parsedReceipt[4].success).toBeTrue()
 
 		expect(parsedReceipt[1]).toBeDefined()
 		expect(parsedReceipt[1].type).toBe(Action.LIMIT_SINGLE)
 		expect(parsedReceipt[1].data).toBeDefined()
+		expect(parsedReceipt[1].success).toBeTrue()
 		// biome-ignore lint/style/noNonNullAssertion: result is defined
 		expect(parsedReceipt[1].data!.offerId).toBe(1)
 		// biome-ignore lint/style/noNonNullAssertion: result is defined
@@ -169,6 +185,7 @@ describe('Limit order', () => {
 		expect(parsedSimulationResult.length).toBe(4)
 		expect(parsedSimulationResult[0]).toBeDefined()
 		expect(parsedSimulationResult[0].type).toBe(Action.CANCEL)
+		expect(parsedSimulationResult[0].success).toBeTrue()
 		expect(parsedSimulationResult[0].data.inbound.amount).toBe(
 			offer.data.received.amount,
 		)
@@ -178,17 +195,25 @@ describe('Limit order', () => {
 		expect(parsedSimulationResult[0].data.provision.amount).toBe(
 			offer.data.provision.amount,
 		)
+		expect(parsedSimulationResult[0].error).toBeUndefined()
+
 		expect(parsedSimulationResult[1]).toBeDefined()
+		expect(parsedSimulationResult[1].success).toBeTrue()
 		expect(parsedSimulationResult[1].type).toBe(Action.TAKE_ALL)
 		expect(parsedSimulationResult[1].data).toBeUndefined()
+		expect(parsedSimulationResult[1].error).toBeUndefined()
 
 		expect(parsedSimulationResult[2]).toBeDefined()
+		expect(parsedSimulationResult[2].success).toBeTrue()
 		expect(parsedSimulationResult[2].type).toBe(Action.TAKE_ALL)
 		expect(parsedSimulationResult[2].data).toBeUndefined()
+		expect(parsedSimulationResult[2].error).toBeUndefined()
 
 		expect(parsedSimulationResult[3]).toBeDefined()
+		expect(parsedSimulationResult[3].success).toBeTrue()
 		expect(parsedSimulationResult[3].type).toBe(Action.TAKE_ALL)
 		expect(parsedSimulationResult[3].data).toBeUndefined()
+		expect(parsedSimulationResult[3].error).toBeUndefined()
 
 		const receipt = await client.writeContractSync(request)
 		const parsedReceipt = actions.parseLogs(receipt.logs)
@@ -197,6 +222,7 @@ describe('Limit order', () => {
 		expect(parsedReceipt.length).toBe(4)
 		expect(parsedReceipt[0]).toBeDefined()
 		expect(parsedReceipt[0].type).toBe(Action.CANCEL)
+		expect(parsedReceipt[0].success).toBeTrue()
 		// biome-ignore lint/style/noNonNullAssertion: result is defined
 		expect(parsedReceipt[0].data!.inbound.amount).toBe(
 			offer.data.received.amount,
@@ -210,9 +236,11 @@ describe('Limit order', () => {
 		expect(parsedReceipt[1]).toBeDefined()
 		expect(parsedReceipt[1].type).toBe(Action.TAKE_ALL)
 		expect(parsedReceipt[1].data).toBeUndefined()
+		expect(parsedReceipt[1].success).toBeTrue()
 		expect(parsedReceipt[2]).toBeDefined()
 		expect(parsedReceipt[2].type).toBe(Action.TAKE_ALL)
 		expect(parsedReceipt[2].data).toBeUndefined()
+		expect(parsedReceipt[2].success).toBeTrue()
 	})
 
 	it('Should cancel a consumed limit order', async () => {
@@ -271,18 +299,26 @@ describe('Limit order', () => {
 		expect(parsedSimulationResult[0].data.inbound.amount).toBe(inbound)
 		expect(parsedSimulationResult[0].data.outbound.amount).toBe(outbound)
 		expect(parsedSimulationResult[0].data.provision.amount).toBe(provision)
+		expect(parsedSimulationResult[0].success).toBeTrue()
+		expect(parsedSimulationResult[0].error).toBeUndefined()
 
 		expect(parsedSimulationResult[1]).toBeDefined()
 		expect(parsedSimulationResult[1].type).toBe(Action.TAKE_ALL)
 		expect(parsedSimulationResult[1].data).toBeUndefined()
+		expect(parsedSimulationResult[1].success).toBeTrue()
+		expect(parsedSimulationResult[1].error).toBeUndefined()
 
 		expect(parsedSimulationResult[2]).toBeDefined()
 		expect(parsedSimulationResult[2].type).toBe(Action.TAKE_ALL)
 		expect(parsedSimulationResult[2].data).toBeUndefined()
+		expect(parsedSimulationResult[2].success).toBeTrue()
+		expect(parsedSimulationResult[2].error).toBeUndefined()
 
 		expect(parsedSimulationResult[3]).toBeDefined()
 		expect(parsedSimulationResult[3].type).toBe(Action.TAKE_ALL)
 		expect(parsedSimulationResult[3].data).toBeUndefined()
+		expect(parsedSimulationResult[3].success).toBeTrue()
+		expect(parsedSimulationResult[3].error).toBeUndefined()
 
 		const receipt = await client.writeContractSync(request)
 		const parsedReceipt = actions.parseLogs(receipt.logs)
@@ -291,6 +327,7 @@ describe('Limit order', () => {
 		expect(parsedReceipt.length).toBe(4)
 		expect(parsedReceipt[0]).toBeDefined()
 		expect(parsedReceipt[0].type).toBe(Action.CANCEL)
+		expect(parsedReceipt[0].success).toBeTrue()
 		// biome-ignore lint/style/noNonNullAssertion: result is defined
 		expect(parsedReceipt[0]!.data!.inbound.amount).toBe(inbound)
 		// biome-ignore lint/style/noNonNullAssertion: result is defined
@@ -301,9 +338,11 @@ describe('Limit order', () => {
 		expect(parsedReceipt[1]).toBeDefined()
 		expect(parsedReceipt[1].type).toBe(Action.TAKE_ALL)
 		expect(parsedReceipt[1].data).toBeUndefined()
+		expect(parsedReceipt[1].success).toBeTrue()
 		expect(parsedReceipt[2]).toBeDefined()
 		expect(parsedReceipt[2].type).toBe(Action.TAKE_ALL)
 		expect(parsedReceipt[2].data).toBeUndefined()
+		expect(parsedReceipt[2].success).toBeTrue()
 		expect(parsedReceipt[3]).toBeDefined()
 		expect(parsedReceipt[3].type).toBe(Action.TAKE_ALL)
 		expect(parsedReceipt[3].data).toBeUndefined()
@@ -354,9 +393,13 @@ describe('Limit order', () => {
 		expect(parsedSimulationResult[0].data.inbound.amount).toBe(inbound)
 		expect(parsedSimulationResult[0].data.outbound.amount).toBe(0n)
 		expect(parsedSimulationResult[0].data.provision.amount).toBe(0n)
+		expect(parsedSimulationResult[0].success).toBeTrue()
+		expect(parsedSimulationResult[0].error).toBeUndefined()
 		expect(parsedSimulationResult[1]).toBeDefined()
 		expect(parsedSimulationResult[1].type).toBe(Action.TAKE_ALL)
 		expect(parsedSimulationResult[1].data).toBeUndefined()
+		expect(parsedSimulationResult[1].success).toBeTrue()
+		expect(parsedSimulationResult[1].error).toBeUndefined()
 
 		const receipt = await client.writeContractSync(request)
 		const parsedReceipt = actions.parseLogs(receipt.logs)
@@ -365,6 +408,7 @@ describe('Limit order', () => {
 		expect(parsedReceipt.length).toBe(2)
 		expect(parsedReceipt[0]).toBeDefined()
 		expect(parsedReceipt[0].type).toBe(Action.CLAIM)
+		expect(parsedReceipt[0].success).toBeTrue()
 		// biome-ignore lint/style/noNonNullAssertion: result is defined
 		expect(parsedReceipt[0]!.data!.inbound.amount).toBe(inbound)
 		// biome-ignore lint/style/noNonNullAssertion: result is defined
@@ -374,5 +418,6 @@ describe('Limit order', () => {
 		expect(parsedReceipt[1]).toBeDefined()
 		expect(parsedReceipt[1].type).toBe(Action.TAKE_ALL)
 		expect(parsedReceipt[1].data).toBeUndefined()
+		expect(parsedReceipt[1].success).toBeTrue()
 	})
 })
