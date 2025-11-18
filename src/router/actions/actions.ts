@@ -18,6 +18,14 @@ export class VifRouterActions<
 	TActions extends readonly Action[] = readonly [],
 > {
 	/**
+	 * Returns the list of action elements
+	 * @returns List of action elements
+	 */
+	get list(): readonly ActionElement[] {
+		return this.actions
+	}
+
+	/**
 	 * Creates a new VifRouterActions instance
 	 * @param router - The VifRouter instance to use for execution
 	 */

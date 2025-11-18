@@ -61,6 +61,14 @@ export class VifRouterActionsBuilder<
 	private actions: ActionElement[] = []
 
 	/**
+	 * Returns the list of action elements
+	 * @returns List of action elements
+	 */
+	get list(): readonly ActionElement[] {
+		return this.actions
+	}
+
+	/**
 	 * Creates a new VifRouterActionsBuilder instance
 	 * @param router - The VifRouter instance to use for execution
 	 */
