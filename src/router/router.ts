@@ -6,6 +6,7 @@ import {
 	vifDomain,
 } from '../lib/authorization'
 import { VifRouterActionsBuilder } from './actions/builder'
+import type { Action } from './export'
 
 export class VifRouter {
 	public readonly CORE_DOMAIN: TypedDataDomain
@@ -18,7 +19,11 @@ export class VifRouter {
 		this.CORE_DOMAIN = vifDomain(chainId, core)
 	}
 
-	createActions(): VifRouterActionsBuilder {
+	createActions(): VifRouterActionsBuilder<Action[]> {
+		return new VifRouterActionsBuilder(this)
+	}
+
+	createTypedActions(): VifRouterActionsBuilder {
 		return new VifRouterActionsBuilder(this)
 	}
 

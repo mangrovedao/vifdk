@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { packedOfferList } from '../../src/builder/reader/offer-list'
 import { OfferList } from '../../src/lib/offer-list'
+import { Action } from '../../src/router/actions/enum'
 import { VifRouter } from '../../src/router/router'
 import { mint } from '../config/mint'
 import { approveIfNeeded, config } from '../config/tokens'
@@ -44,7 +45,7 @@ describe('OfferList', () => {
 		await approveIfNeeded(client, [amount.token], config.Vif)
 
 		const actions = router
-			.createActions()
+			.createTypedActions()
 			.orderSingle({
 				market: config.market.asks,
 				fillVolume: amount,
@@ -62,12 +63,25 @@ describe('OfferList', () => {
 			functionName: 'execute',
 			args: [commands, args],
 		})
-		const [orderResult] = actions.parseSimulationResult(result)
+		const [orderResult, settleResult, takeResult] =
+			actions.parseSimulationResult(result)
 
-		expect(orderResult.gave.amount).toBe(simulation.gave.amount)
-		expect(orderResult.got.amount).toBe(simulation.got.amount)
-		expect(orderResult.fee.amount).toBe(simulation.fee.amount)
-		expect(orderResult.bounty.amount).toBe(simulation.bounty.amount)
+		expect(orderResult).toBeDefined()
+		expect(settleResult).toBeDefined()
+		expect(takeResult).toBeDefined()
+
+		expect(orderResult.type).toBe(Action.ORDER_SINGLE)
+		expect(orderResult.data).toBeDefined()
+		expect(orderResult.data.gave.amount).toBe(simulation.gave.amount)
+		expect(orderResult.data.got.amount).toBe(simulation.got.amount)
+		expect(orderResult.data.fee.amount).toBe(simulation.fee.amount)
+		expect(orderResult.data.bounty.amount).toBe(simulation.bounty.amount)
+
+		expect(settleResult.type).toBe(Action.SETTLE_ALL)
+		expect(settleResult.data).toBeUndefined()
+
+		expect(takeResult.type).toBe(Action.TAKE_ALL)
+		expect(takeResult.data).toBeUndefined()
 	})
 
 	it('should simulate the book correctly (exact out)', async () => {
@@ -105,7 +119,7 @@ describe('OfferList', () => {
 		await approveIfNeeded(client, [config.market.quote.token], config.Vif)
 
 		const actions = router
-			.createActions()
+			.createTypedActions()
 			.orderSingle({
 				market: config.market.asks,
 				fillVolume: amount,
@@ -123,11 +137,24 @@ describe('OfferList', () => {
 			functionName: 'execute',
 			args: [commands, args],
 		})
-		const [orderResult] = actions.parseSimulationResult(result)
+		const [orderResult, settleResult, takeResult] =
+			actions.parseSimulationResult(result)
 
-		expect(orderResult.gave.amount).toBe(simulation.gave.amount)
-		expect(orderResult.got.amount).toBe(simulation.got.amount)
-		expect(orderResult.fee.amount).toBe(simulation.fee.amount)
-		expect(orderResult.bounty.amount).toBe(simulation.bounty.amount)
+		expect(orderResult).toBeDefined()
+		expect(settleResult).toBeDefined()
+		expect(takeResult).toBeDefined()
+
+		expect(orderResult.type).toBe(Action.ORDER_SINGLE)
+		expect(orderResult.data).toBeDefined()
+		expect(orderResult.data.gave.amount).toBe(simulation.gave.amount)
+		expect(orderResult.data.got.amount).toBe(simulation.got.amount)
+		expect(orderResult.data.fee.amount).toBe(simulation.fee.amount)
+		expect(orderResult.data.bounty.amount).toBe(simulation.bounty.amount)
+
+		expect(settleResult.type).toBe(Action.SETTLE_ALL)
+		expect(settleResult.data).toBeUndefined()
+
+		expect(takeResult.type).toBe(Action.TAKE_ALL)
+		expect(takeResult.data).toBeUndefined()
 	})
 })

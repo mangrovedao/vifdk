@@ -194,18 +194,6 @@ export type ActionsStoredMetadata<
 			? [ActionStoredMetadata<TAction>, ...ActionsStoredMetadata<TRest>]
 			: never
 
-export type FailableResult<TResult> =
-	| {
-			success: true
-			result: TResult
-			error?: undefined
-	  }
-	| {
-			success: false
-			error: FailedActionError
-			result?: undefined
-	  }
-
 export type DispatchResult = {
 	success: boolean
 	returnData: Hex
@@ -222,8 +210,8 @@ export type ActionOrFailable<TAction extends Action> =
 		? TAction | ToFailableAction<TAction>
 		: TAction
 
-export type RawActionResult<TAction> = TAction extends Action
-	? TAction extends ActionOrFailable<Action.ORDER_SINGLE>
+export type RawActionResultContent<TAction extends Action> =
+	TAction extends ActionOrFailable<Action.ORDER_SINGLE>
 		? OrderResult
 		: TAction extends ActionOrFailable<Action.ORDER_MULTI>
 			? MultiOrderResult
@@ -234,14 +222,42 @@ export type RawActionResult<TAction> = TAction extends Action
 				: TAction extends ActionOrFailable<Action.LIMIT_SINGLE>
 					? LimitOrderResult
 					: undefined
+
+export type ActionResult<TAction> = TAction extends Action
+	?
+			| {
+					type: TAction
+					success: true
+					data: RawActionResultContent<TAction>
+					error?: undefined
+			  }
+			| (TAction extends FailableActions
+					? {
+							type: TAction
+							success: false
+							error: FailedActionError
+							data?: undefined
+						}
+					: never)
 	: never
+
+export type ActionResultFromReceiptContent<TAction extends Action> =
+	TAction extends ActionOrFailable<Action.ORDER_MULTI>
+		? MultiOrderResultFromReceipt
+		: RawActionResultContent<TAction>
 
 export type ActionResultFromReceipt<TAction> = TAction extends Action
 	?
-			| (TAction extends ActionOrFailable<Action.ORDER_MULTI>
-					? MultiOrderResultFromReceipt
-					: RawActionResult<TAction>)
-			| undefined
+			| {
+					type: TAction
+					data: ActionResultFromReceiptContent<TAction>
+					success: true
+			  }
+			| {
+					type: TAction
+					data?: undefined
+					success: false
+			  }
 	: never
 
 export type ActionToFailable = {
@@ -260,24 +276,31 @@ export type ActionToFailable = {
 }
 
 export type FailableActions = ActionToFailable[keyof ActionToFailable]
+export type NonFailableActions = Exclude<Action, FailableActions>
 
 export type ToFailableAction<TAction> = TAction extends keyof ActionToFailable
 	? ActionToFailable[TAction]
 	: never
 
-export type ActionResult<TAction> = TAction extends FailableActions
-	? FailableResult<RawActionResult<TAction>>
-	: RawActionResult<TAction>
+export type ToNonFailableAction<TAction> = TAction extends NonFailableActions
+	? TAction
+	: {
+			[K in keyof ActionToFailable]: ActionToFailable[K] extends TAction
+				? K
+				: never
+		}[keyof ActionToFailable]
 
 export type ActionsResult<
 	TActions extends readonly unknown[] = readonly Action[],
 > = TActions extends readonly []
 	? readonly []
-	: TActions extends readonly [infer TAction]
-		? [ActionResult<TAction>]
-		: TActions extends readonly [infer TAction, ...infer TRest]
-			? [ActionResult<TAction>, ...ActionsResult<TRest>]
-			: never
+	: TActions extends Action[]
+		? TActions extends readonly [infer TAction]
+			? [ActionResult<TAction>]
+			: TActions extends readonly [infer TAction, ...infer TRest]
+				? [ActionResult<TAction>, ...ActionsResult<TRest>]
+				: ActionResult<Action>[]
+		: never
 
 export type ActionsResultFromReceipt<
 	TActions extends readonly unknown[] = readonly Action[],
@@ -295,4 +318,6 @@ export type ExtendActions<
 	TActions extends readonly Action[],
 	TAction extends Action,
 	TCanFail extends boolean,
-> = [...TActions, TCanFail extends true ? ToFailableAction<TAction> : TAction]
+> = Action[] extends TActions
+	? Action[]
+	: [...TActions, TCanFail extends true ? ToFailableAction<TAction> : TAction]

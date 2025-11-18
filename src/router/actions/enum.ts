@@ -1,4 +1,8 @@
-import type { ActionToFailable, FailableActions } from './types'
+import type {
+	ActionToFailable,
+	FailableActions,
+	ToNonFailableAction,
+} from './types'
 
 export enum Action {
 	/** Command to execute a single market order */
@@ -91,6 +95,24 @@ export const FAILABLE_COUNTERPARTS: ActionToFailable = {
  */
 export function isFailableAction(action: Action): action is FailableActions {
 	return Object.values<number>(FAILABLE_COUNTERPARTS).includes(action)
+}
+
+/**
+ * Converts a failable action to its non-failable counterpart
+ * @param action - The failable action to convert
+ * @returns The non-failable action
+ */
+export function toNonFailableAction<TAction extends Action = Action>(
+	action: TAction,
+): ToNonFailableAction<TAction> {
+	if (isFailableAction(action)) {
+		const nonFailable = Object.entries(FAILABLE_COUNTERPARTS).find(
+			([, failable]) => failable === action,
+		)
+		if (!nonFailable) throw new Error('Action is not failable')
+		return Number(nonFailable[0]) as ToNonFailableAction<TAction>
+	}
+	return action as ToNonFailableAction<TAction>
 }
 
 /**

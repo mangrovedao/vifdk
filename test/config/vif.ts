@@ -159,7 +159,7 @@ export async function createOffer(
 	// biome-ignore lint/style/noNonNullAssertion: test env
 	const router = new VifRouter(config.VifRouter, config.Vif, client.chain!.id)
 	const actions = router
-		.createActions()
+		.createTypedActions()
 		.limitSingle({
 			market,
 			gives,
@@ -193,9 +193,16 @@ export async function createOffer(
 
 	return readContract(client, {
 		address: config.Vif,
-		...rawOffer(market, lo.offerId),
+		// biome-ignore lint/style/noNonNullAssertion: test env
+		...rawOffer(market, lo.data!.offerId),
 	}).then((val) =>
-		Offer.fromPacked(market, val, lo.offerId, client.account?.address),
+		Offer.fromPacked(
+			market,
+			val,
+			// biome-ignore lint/style/noNonNullAssertion: test env
+			lo.data!.offerId,
+			client.account?.address,
+		),
 	)
 }
 
@@ -272,7 +279,7 @@ export async function createOffers(
 					...rawOffer(
 						offer.market,
 						// biome-ignore lint/style/noNonNullAssertion: test env
-						(results[i] as LimitOrderResult | undefined)!.offerId,
+						(results[i].data as LimitOrderResult | undefined)!.offerId,
 					),
 				}) as const,
 		),
@@ -284,7 +291,7 @@ export async function createOffers(
 				offers[i]!.market,
 				r,
 				// biome-ignore lint/style/noNonNullAssertion: test env
-				(results[i] as LimitOrderResult | undefined)!.offerId,
+				(results[i].data as LimitOrderResult | undefined)!.offerId,
 				// biome-ignore lint/style/noNonNullAssertion: test env
 				client.account!.address,
 			),
@@ -307,7 +314,7 @@ export async function marketOrder(
 	// biome-ignore lint/style/noNonNullAssertion: test env
 	const router = new VifRouter(config.VifRouter, config.Vif, client.chain!.id)
 	const actions = router
-		.createActions()
+		.createTypedActions()
 		.orderSingle({
 			market,
 			fillVolume: amount,
@@ -336,5 +343,5 @@ export async function marketOrder(
 	})
 	const results = actions.parseLogs(receipt.logs)
 	// biome-ignore lint/style/noNonNullAssertion: result is defined
-	return results[0]!
+	return results[0]!.data!
 }
