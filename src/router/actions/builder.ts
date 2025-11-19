@@ -2,6 +2,7 @@
  * ABI imports for encoding/decoding parameters and events
  */
 import {
+	type Address,
 	encodeAbiParameters,
 	isAddressEqual,
 	maxUint256,
@@ -23,6 +24,14 @@ import { Token, type TokenAmount } from '../../lib/token'
  * Router type
  */
 import type { VifRouter } from '../router'
+import {
+	isCancelOrClaimElement,
+	isLimitOrderElement,
+	isMultiOrderElement,
+	isSettleAllElement,
+	isSingleOrderElement,
+	isTakeAllElement,
+} from './action-element'
 /**
  * Actions class
  */
@@ -30,17 +39,22 @@ import { VifRouterActions } from './actions'
 /**
  * Action enums and utilities
  */
-import { Action } from './enum'
+import { Action, isSettlementAction } from './enum'
 /**
  * Error types
  */
-import { InvalidPathMultiOrderError, InvalidTokenError } from './errors'
+import {
+	InvalidPathMultiOrderError,
+	InvalidTokenError,
+	MissingReceiverError,
+} from './errors'
 /**
  * Action types and parameters
  */
 import type {
 	ActionElement,
 	ActionOrFailable,
+	AppendSettlementActionsOrSweep,
 	AuthorizeParams,
 	ClaimCancelParams,
 	ClearAllUptoParams,
@@ -49,6 +63,7 @@ import type {
 	OrderMultiParams,
 	OrderSingleParams,
 	SettleParams,
+	SortedActions,
 	SweepParams,
 	TakeAllParams,
 	TakeParams,
@@ -110,7 +125,7 @@ export class VifRouterActionsBuilder<
 				],
 				[market.key, maxTick.value, fillVolume.amount, fillWants, maxOffers],
 			),
-			metadata: market,
+			metadata: { market, fillVolume },
 		} satisfies ActionElement<ActionOrFailable<Action.ORDER_SINGLE>>)
 		return this as unknown as VifRouterActionsBuilder<
 			ExtendActions<TActions, Action.ORDER_SINGLE, TCanFail>
@@ -199,7 +214,7 @@ export class VifRouterActionsBuilder<
 					limitVolume.amount,
 				],
 			),
-			metadata: { markets, fillWants },
+			metadata: { markets, fillWants, fillVolume },
 		} satisfies ActionElement<ActionOrFailable<Action.ORDER_MULTI>>)
 		return this as unknown as VifRouterActionsBuilder<
 			ExtendActions<TActions, Action.ORDER_MULTI, false>
@@ -254,7 +269,7 @@ export class VifRouterActionsBuilder<
 					Number(provision.amount / provision.token.unit),
 				],
 			),
-			metadata: { market, offerId: initialOfferId },
+			metadata: { market, offerId: initialOfferId, gives, provision, expiry },
 		} satisfies ActionElement<ActionOrFailable<Action.LIMIT_SINGLE>>)
 		return this as unknown as VifRouterActionsBuilder<
 			ExtendActions<TActions, Action.LIMIT_SINGLE, TCanFail>
@@ -609,7 +624,112 @@ export class VifRouterActionsBuilder<
 		>
 	}
 
-	build(): VifRouterActions<TActions> {
+	/**
+	 * This method reorders the settlements actions to be at the end of the list
+	 * as well as the sweep action
+	 * @returns Updated VifRouterActionsBuilder instance
+	 */
+	private _reorderSettlements(): VifRouterActionsBuilder<
+		SortedActions<TActions>
+	> {
+		this.actions.sort((a, b) => {
+			return (
+				Number(isSettlementAction(a.action) || a.action === Action.SWEEP) -
+				Number(isSettlementAction(b.action) || b.action === Action.SWEEP)
+			)
+		})
+		return this as unknown as VifRouterActionsBuilder<SortedActions<TActions>>
+	}
+
+	private _addRecommendedActions(
+		receiver: Address,
+	): VifRouterActionsBuilder<AppendSettlementActionsOrSweep<TActions>> {
+		const settlements: Map<Address, Token> = new Map()
+		const takes: Map<Address, Token> = new Map()
+		let sweep = false
+
+		const addSettlement = (token?: Token) => {
+			if (token) settlements.set(token.address, token)
+		}
+		const addTake = (token?: Token) => {
+			if (token) takes.set(token.address, token)
+		}
+
+		for (const action of this.actions.slice()) {
+			if (isSettleAllElement(action)) {
+				settlements.delete(action.metadata.address)
+			} else if (isTakeAllElement(action)) {
+				takes.delete(action.metadata.address)
+			} else if (action.action === Action.SWEEP) {
+				sweep = false
+			} else if (isCancelOrClaimElement(action)) {
+				addTake(action.metadata.market.outboundToken.token)
+				addTake(action.metadata.market.inboundToken.token)
+				addTake(Token.NATIVE_TOKEN)
+			} else if (isSingleOrderElement(action)) {
+				addSettlement(action.metadata.market.inboundToken.token)
+				addTake(action.metadata.market.outboundToken.token)
+				addTake(Token.NATIVE_TOKEN)
+			} else if (isMultiOrderElement(action)) {
+				addSettlement(action.metadata.markets.at(0)?.inboundToken.token)
+				for (const market of action.metadata.markets) {
+					addTake(market.outboundToken.token)
+				}
+				addTake(Token.NATIVE_TOKEN)
+			} else if (isLimitOrderElement(action)) {
+				addSettlement(action.metadata.market.outboundToken.token)
+				if (action.metadata.offerId) {
+					addTake(action.metadata.market.inboundToken.token)
+					addTake(Token.NATIVE_TOKEN)
+					addTake(action.metadata.provision.token)
+				}
+				if (action.metadata.expiry || action.metadata.provision.amount > 0n) {
+					addSettlement(Token.NATIVE_TOKEN)
+					sweep = true
+				}
+			}
+		}
+
+		for (const settlement of settlements.values()) {
+			this.settleAll(settlement)
+		}
+
+		for (const take of takes.values()) {
+			this.takeAll({
+				receiver,
+				token: take,
+			})
+		}
+
+		if (sweep) this.sweep({ receiver, token: Token.NATIVE_TOKEN })
+
+		return this as unknown as VifRouterActionsBuilder<
+			AppendSettlementActionsOrSweep<TActions>
+		>
+	}
+
+	build<
+		TAddRecommendedActions extends boolean = false,
+		TReorderSettlements extends boolean = false,
+	>(params?: {
+		addRecommendedActions?: TAddRecommendedActions
+		reorderSettlements?: TReorderSettlements
+		receiver?: Address
+	}): VifRouterActions<
+		TAddRecommendedActions extends false
+			? TReorderSettlements extends false
+				? TActions
+				: SortedActions<TActions>
+			: TReorderSettlements extends false
+				? AppendSettlementActionsOrSweep<TActions>
+				: AppendSettlementActionsOrSweep<SortedActions<TActions>>
+	> {
+		const { addRecommendedActions, reorderSettlements, receiver } = params ?? {}
+		if (reorderSettlements) this._reorderSettlements()
+		if (addRecommendedActions) {
+			if (!receiver) throw new MissingReceiverError()
+			this._addRecommendedActions(receiver)
+		}
 		return new VifRouterActions(this.router, this.actions)
 	}
 }

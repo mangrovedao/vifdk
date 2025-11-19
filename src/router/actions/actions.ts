@@ -1,5 +1,11 @@
-import { encodePacked, type Hex, type Log } from 'viem'
+import { type Address, encodePacked, type Hex, type Log } from 'viem'
+import { Token, type TokenAmount } from '../../lib/token'
 import type { VifRouter } from '../router'
+import {
+	isLimitOrderElement,
+	isMultiOrderElement,
+	isSingleOrderElement,
+} from './action-element'
 import type { Action } from './enum'
 import { parseFromLogs } from './parser/receipt'
 import { parseSimulationResult } from './parser/simulation'
@@ -8,6 +14,7 @@ import type {
 	ActionsResult,
 	ActionsResultFromReceipt,
 	DispatchResult,
+	ExpectedAllowances,
 } from './types'
 
 /**
@@ -77,5 +84,80 @@ export class VifRouterActions<
 	 */
 	parseLogs(logs: Log[]): ActionsResultFromReceipt<TActions> {
 		return parseFromLogs(logs, this.actions)
+	}
+
+	/**
+	 * Calculates the expected allowances needed for the actions
+	 * @dev If a token amount is returned with 0, it means it is unknown
+	 * 			This could be due to market orders with unknown fill volume (exact out)
+	 *
+	 * @dev These values do not take the returns from other actions (e.g. an order after a claim could require no allowance)
+	 * @returns Expected allowances for the actions
+	 */
+	expectedAllowances(): ExpectedAllowances {
+		const allowances: Map<Address, TokenAmount> = new Map()
+
+		const addAmount = (amount: TokenAmount | Token) => {
+			const token = amount instanceof Token ? amount : amount.token
+			const bigintAmount = amount instanceof Token ? 0n : amount.amount
+			const saved = allowances.get(token.address)
+			if (saved) {
+				if (saved.amount === 0n) return
+				if (bigintAmount === 0n) {
+					saved.amount = 0n
+					return
+				}
+				saved.amount += bigintAmount
+				return
+			}
+			allowances.set(token.address, token.withUnit(1n).amount(bigintAmount))
+		}
+
+		for (const action of this.actions) {
+			if (isSingleOrderElement(action)) {
+				addAmount(
+					action.metadata.fillVolume.token.equals(
+						action.metadata.market.inboundToken.token,
+					)
+						? action.metadata.fillVolume
+						: action.metadata.market.inboundToken,
+				)
+			} else if (isMultiOrderElement(action)) {
+				const sendToken = action.metadata.markets.at(0)?.inboundToken.token
+				if (!sendToken) continue
+				addAmount(
+					action.metadata.fillWants ? sendToken : action.metadata.fillVolume,
+				)
+			} else if (isLimitOrderElement(action)) {
+				addAmount(action.metadata.gives)
+			}
+		}
+		return Array.from(allowances.values())
+	}
+
+	/**
+	 * Calculates the expected value to pass to the router to execute the actions
+	 * @dev it does not take into account the possible amounts received from other actions
+	 * @returns The expected value to pass to the router to execute the actions
+	 */
+	expectedValue({
+		globalProvision,
+	}: {
+		globalProvision: TokenAmount
+	}): TokenAmount {
+		const value = Token.NATIVE_TOKEN.amount(0n)
+		for (const action of this.actions) {
+			if (isLimitOrderElement(action)) {
+				if (action.metadata.expiry) {
+					value.amount +=
+						action.metadata.provision.amount < globalProvision.amount
+							? globalProvision.amount
+							: action.metadata.provision.amount
+				} else if (action.metadata.provision.amount > 0n) {
+					value.amount += action.metadata.provision.amount
+				}
+			}
+		}
+		return value
 	}
 }

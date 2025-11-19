@@ -39,9 +39,9 @@ export function parseSingleActionSimulationResultOrderSingle(
 	return {
 		type: element.action,
 		data: {
-			gave: market.inboundToken.token.amount(res.gave),
-			got: market.outboundToken.token.amount(res.got),
-			fee: market.inboundToken.token.withUnit(1n).amount(res.fee),
+			gave: market.market.inboundToken.token.amount(res.gave),
+			got: market.market.outboundToken.token.amount(res.got),
+			fee: market.market.inboundToken.token.withUnit(1n).amount(res.fee),
 			bounty: Token.NATIVE_TOKEN.amount(res.bounty),
 		},
 		success: true,

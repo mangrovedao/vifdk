@@ -1,6 +1,7 @@
 import type {
 	ActionToFailable,
 	FailableActions,
+	SettlementActions,
 	ToNonFailableAction,
 } from './types'
 
@@ -70,6 +71,12 @@ export enum Action {
 	FAILABLE_CLEAR_UPTO_OR_CLAIM = 0x8e,
 }
 
+/** Mask to extract the action type from a raw action */
+export const ACTION_MASK = 0x0f
+
+/** Mask to extract the failable flag from a raw action */
+export const FAILABLE_MASK = 0x80
+
 /**
  * Maps each action to its failable counterpart
  */
@@ -94,7 +101,7 @@ export const FAILABLE_COUNTERPARTS: ActionToFailable = {
  * @returns True if the action is failable, false otherwise
  */
 export function isFailableAction(action: Action): action is FailableActions {
-	return Object.values<number>(FAILABLE_COUNTERPARTS).includes(action)
+	return (action & FAILABLE_MASK) === FAILABLE_MASK
 }
 
 /**
@@ -105,14 +112,7 @@ export function isFailableAction(action: Action): action is FailableActions {
 export function toNonFailableAction<TAction extends Action = Action>(
 	action: TAction,
 ): ToNonFailableAction<TAction> {
-	if (isFailableAction(action)) {
-		const nonFailable = Object.entries(FAILABLE_COUNTERPARTS).find(
-			([, failable]) => failable === action,
-		)
-		if (!nonFailable) throw new Error('Action is not failable')
-		return Number(nonFailable[0]) as ToNonFailableAction<TAction>
-	}
-	return action as ToNonFailableAction<TAction>
+	return (action & ACTION_MASK) as ToNonFailableAction<TAction>
 }
 
 /**
@@ -146,4 +146,19 @@ export const ACTION_LABELS: Record<Action, string> = {
 	[Action.CLEAR_ALL]: 'Clear All',
 	[Action.CLEAR_UPTO_OR_CLAIM]: 'Clear Up to or Claim',
 	[Action.FAILABLE_CLEAR_UPTO_OR_CLAIM]: 'Clear Up to or Claim (Failable)',
+}
+
+/**
+ * Checks if an action is a settlement action
+ * @param action - The action to check
+ * @returns True if the action is a settlement action, false otherwise
+ */
+export function isSettlementAction(
+	action: Action,
+): action is SettlementActions {
+	action = toNonFailableAction(action)
+	return (
+		(action < Action.SWEEP && action > Action.CANCEL) ||
+		action > Action.AUTHORIZE
+	)
 }
