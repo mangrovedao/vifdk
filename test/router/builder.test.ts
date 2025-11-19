@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { zeroAddress } from 'viem'
+import { Token } from '../../src/lib/token'
 import {
 	isSettleAllElement,
 	isTakeAllElement,
@@ -53,15 +54,17 @@ describe('Builder', () => {
 				market: config.market.asks,
 				gives: config.market.base.token.amount('1'),
 				tick: config.market.asks.price(3500),
+				expiry: new Date(Date.now() + 1000 * 60 * 60 * 24),
 			})
 			.limitSingle({
 				market: config.market.bids,
 				gives: config.market.quote.token.amount('1000'),
 				tick: config.market.asks.price(3500),
+				provision: Token.PROVISION_TOKEN.amount('0.01'),
 			})
 			.build({ addRecommendedActions: true, receiver: client.account.address })
 
-		expect(actions.list.length).toBe(4 + 4)
+		expect(actions.list.length).toBe(4 + 6)
 		expect(
 			actions.list.findIndex(
 				(action) =>
@@ -89,6 +92,15 @@ describe('Builder', () => {
 					isTakeAllElement(action) && action.metadata.address === zeroAddress,
 			),
 		).not.toBe(-1)
+		expect(
+			actions.list.findIndex(
+				(action) =>
+					isSettleAllElement(action) && action.metadata.address === zeroAddress,
+			),
+		).not.toBe(-1)
+		expect(
+			actions.list.findIndex((action) => action.action === Action.SWEEP),
+		).not.toBe(-1)
 
 		const approvals = actions.expectedAllowances()
 
@@ -105,5 +117,10 @@ describe('Builder', () => {
 					approval.token.address === config.market.quote.token.address,
 			)?.amountString,
 		).toBe('21000')
+
+		const value = actions.expectedValue({ globalProvision: config.provision })
+		const expectedValue = Token.NATIVE_TOKEN.amount('0.01')
+		expectedValue.amount += config.provision.amount
+		expect(value.amount).toBe(expectedValue.amount)
 	})
 })

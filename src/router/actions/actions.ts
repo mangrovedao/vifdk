@@ -134,4 +134,30 @@ export class VifRouterActions<
 		}
 		return Array.from(allowances.values())
 	}
+
+	/**
+	 * Calculates the expected value to pass to the router to execute the actions
+	 * @dev it does not take into account the possible amounts received from other actions
+	 * @returns The expected value to pass to the router to execute the actions
+	 */
+	expectedValue({
+		globalProvision,
+	}: {
+		globalProvision: TokenAmount
+	}): TokenAmount {
+		const value = Token.NATIVE_TOKEN.amount(0n)
+		for (const action of this.actions) {
+			if (isLimitOrderElement(action)) {
+				if (action.metadata.expiry) {
+					value.amount +=
+						action.metadata.provision.amount < globalProvision.amount
+							? globalProvision.amount
+							: action.metadata.provision.amount
+				} else if (action.metadata.provision.amount > 0n) {
+					value.amount += action.metadata.provision.amount
+				}
+			}
+		}
+		return value
+	}
 }
