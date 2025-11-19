@@ -730,6 +730,6 @@ export class VifRouterActionsBuilder<
 			if (!receiver) throw new MissingReceiverError()
 			this._addRecommendedActions(receiver)
 		}
-		return new VifRouterActions(this.router, this.actions)
+		return new VifRouterActions(this.router, [...this.actions])
 	}
 }
