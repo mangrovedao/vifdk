@@ -66,6 +66,7 @@ export type {
 	ActionsResult,
 	ActionsResultFromReceipt,
 	ExtendActions,
+	SettlementActions,
 } from './router/export'
 
 export {
@@ -79,4 +80,6 @@ export {
 	FailedActionError,
 	InvalidPathMultiOrderError,
 	InvalidTokenError,
+	isSettlementAction,
+	toNonFailableAction,
 } from './router/export'

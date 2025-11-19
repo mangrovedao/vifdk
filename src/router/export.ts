@@ -18,6 +18,8 @@ export {
 	FAILABLE_COUNTERPARTS,
 	isFailableAction,
 	ACTION_LABELS,
+	isSettlementAction,
+	toNonFailableAction,
 } from './actions/enum'
 
 // errors
@@ -62,4 +64,5 @@ export type {
 	ActionsResult,
 	ActionsResultFromReceipt,
 	ExtendActions,
+	SettlementActions,
 } from './actions/types'

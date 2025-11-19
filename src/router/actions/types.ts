@@ -168,20 +168,29 @@ export type ActionStoredMetadata<TAction = Action> = TAction extends Action
 			: TAction extends
 						| ActionOrFailable<Action.CLAIM>
 						| ActionOrFailable<Action.CANCEL>
-						| ActionOrFailable<Action.LIMIT_SINGLE>
-				? { market: SemiMarket; offerId: number }
-				: TAction extends
-							| ActionOrFailable<Action.SETTLE>
-							| ActionOrFailable<Action.TAKE>
-							| ActionOrFailable<Action.SETTLE_ALL>
-							| ActionOrFailable<Action.TAKE_ALL>
-							| ActionOrFailable<Action.SWEEP>
-							| ActionOrFailable<Action.CLEAR_ALL>
-							| ActionOrFailable<Action.CLEAR_UPTO_OR_CLAIM>
-					? Token
-					: TAction extends ActionOrFailable<Action.AUTHORIZE>
-						? Authorization
-						: undefined
+				? {
+						market: SemiMarket
+						offerId: number
+					}
+				: TAction extends ActionOrFailable<Action.LIMIT_SINGLE>
+					? {
+							market: SemiMarket
+							offerId: number
+							expiry?: Date | undefined
+							provision: TokenAmount
+						}
+					: TAction extends
+								| ActionOrFailable<Action.SETTLE>
+								| ActionOrFailable<Action.TAKE>
+								| ActionOrFailable<Action.SETTLE_ALL>
+								| ActionOrFailable<Action.TAKE_ALL>
+								| ActionOrFailable<Action.SWEEP>
+								| ActionOrFailable<Action.CLEAR_ALL>
+								| ActionOrFailable<Action.CLEAR_UPTO_OR_CLAIM>
+						? Token
+						: TAction extends ActionOrFailable<Action.AUTHORIZE>
+							? Authorization
+							: undefined
 	: never
 
 export type ActionsStoredMetadata<
@@ -321,3 +330,37 @@ export type ExtendActions<
 > = Action[] extends TActions
 	? Action[]
 	: [...TActions, TCanFail extends true ? ToFailableAction<TAction> : TAction]
+
+export type SettlementActions =
+	| Action.SETTLE
+	| Action.FAILABLE_SETTLE
+	| Action.TAKE
+	| Action.FAILABLE_TAKE
+	| Action.SETTLE_ALL
+	| Action.FAILABLE_SETTLE_ALL
+	| Action.TAKE_ALL
+	| Action.FAILABLE_TAKE_ALL
+	| Action.CLEAR_ALL
+	| Action.CLEAR_UPTO_OR_CLAIM
+	| Action.FAILABLE_CLEAR_UPTO_OR_CLAIM
+
+type Partition<
+	T extends readonly Action[],
+	Target extends Action,
+	NonTarget extends readonly Action[] = [],
+	Targets extends readonly Action[] = [],
+> = T extends readonly [
+	infer Head extends Action,
+	...infer Tail extends readonly Action[],
+]
+	? Head extends Target
+		? // If Head is the Target (SETTLE), append it to the Targets array
+			Partition<Tail, Target, NonTarget, [...Targets, Head]>
+		: // If Head is NOT the Target, append it to the NonTarget array
+			Partition<Tail, Target, [...NonTarget, Head], Targets>
+	: // Base Case: When T is empty, concatenate the two lists
+		[...NonTarget, ...Targets]
+
+export type SortedActions<T extends readonly Action[]> = Action[] extends T
+	? Action[]
+	: Partition<T, SettlementActions | Action.SWEEP>

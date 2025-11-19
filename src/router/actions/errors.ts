@@ -8,7 +8,9 @@ import type { Token } from '../../lib/token'
 export class InvalidTokenError extends Error {
 	constructor(token: Token, expectedTokens: Token[]) {
 		super(
-			`Invalid token ${token.symbol}, expected ${expectedTokens.map((t) => t.symbol).join(' or ')}.`,
+			`Invalid token ${token.symbol}, expected ${expectedTokens
+				.map((t) => t.symbol)
+				.join(' or ')}.`,
 		)
 	}
 }
@@ -68,6 +70,14 @@ export class InvalidPathMultiOrderError extends Error {
 		}
 		super(
 			`Invalid path for multi order (incorrect links between markets), got: ${pathString}.`,
+		)
+	}
+}
+
+export class MissingReceiverError extends Error {
+	constructor() {
+		super(
+			'Missing receiver address for recommended actions, use the `receiver` parameter to specify the receiver.',
 		)
 	}
 }
