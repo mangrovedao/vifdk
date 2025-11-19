@@ -162,9 +162,9 @@ export type LimitOrderResult = {
 
 export type ActionStoredMetadata<TAction = Action> = TAction extends Action
 	? TAction extends ActionOrFailable<Action.ORDER_SINGLE>
-		? SemiMarket
+		? { market: SemiMarket; fillVolume: TokenAmount }
 		: TAction extends ActionOrFailable<Action.ORDER_MULTI>
-			? { markets: SemiMarket[]; fillWants: boolean }
+			? { markets: SemiMarket[]; fillWants: boolean; fillVolume: TokenAmount }
 			: TAction extends
 						| ActionOrFailable<Action.CLAIM>
 						| ActionOrFailable<Action.CANCEL>
@@ -176,6 +176,7 @@ export type ActionStoredMetadata<TAction = Action> = TAction extends Action
 					? {
 							market: SemiMarket
 							offerId: number
+							gives: TokenAmount
 							expiry?: Date | undefined
 							provision: TokenAmount
 						}
@@ -364,3 +365,10 @@ type Partition<
 export type SortedActions<T extends readonly Action[]> = Action[] extends T
 	? Action[]
 	: Partition<T, SettlementActions | Action.SWEEP>
+
+export type ExpectedAllowances = TokenAmount[]
+
+export type AppendSettlementActionsOrSweep<T extends readonly Action[]> =
+	Action[] extends T
+		? Action[]
+		: [...T, ...(SettlementActions | Action.SWEEP)[]]

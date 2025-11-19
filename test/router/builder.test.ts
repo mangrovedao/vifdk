@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'bun:test'
+import { zeroAddress } from 'viem'
+import {
+	isSettleAllElement,
+	isTakeAllElement,
+} from '../../src/router/actions/action-element'
 import { Action, isSettlementAction } from '../../src/router/actions/enum'
 import type { SortedActions } from '../../src/router/actions/types'
+import { VifRouter } from '../../src/router/export'
+import { config } from '../config/tokens'
+import { mainClient } from '../utils'
 
 describe('Builder', () => {
 	it('should reorder settlements correctly (with correct types)', () => {
@@ -26,5 +34,76 @@ describe('Builder', () => {
 		expect(sorted[2]).toBe(Action.SETTLE_ALL)
 		expect(sorted[3]).toBe(Action.TAKE_ALL)
 		expect(sorted[4]).toBe(Action.SWEEP)
+	})
+
+	it('should add the correct recommended actions and correct approval recommendations', () => {
+		const client = mainClient()
+		const router = new VifRouter(config.VifRouter, config.Vif, client.chain.id)
+		const actions = router
+			.createTypedActions()
+			.orderSingle({
+				market: config.market.asks,
+				fillVolume: config.market.quote.token.amount('10000'),
+			})
+			.orderSingle({
+				market: config.market.asks,
+				fillVolume: config.market.quote.token.amount('10000'),
+			})
+			.limitSingle({
+				market: config.market.asks,
+				gives: config.market.base.token.amount('1'),
+				tick: config.market.asks.price(3500),
+			})
+			.limitSingle({
+				market: config.market.bids,
+				gives: config.market.quote.token.amount('1000'),
+				tick: config.market.asks.price(3500),
+			})
+			.build({ addRecommendedActions: true, receiver: client.account.address })
+
+		expect(actions.list.length).toBe(4 + 4)
+		expect(
+			actions.list.findIndex(
+				(action) =>
+					isSettleAllElement(action) &&
+					action.metadata.address === config.market.base.token.address,
+			),
+		).not.toBe(-1)
+		expect(
+			actions.list.findIndex(
+				(action) =>
+					isSettleAllElement(action) &&
+					action.metadata.address === config.market.quote.token.address,
+			),
+		).not.toBe(-1)
+		expect(
+			actions.list.findIndex(
+				(action) =>
+					isTakeAllElement(action) &&
+					action.metadata.address === config.market.base.token.address,
+			),
+		).not.toBe(-1)
+		expect(
+			actions.list.findIndex(
+				(action) =>
+					isTakeAllElement(action) && action.metadata.address === zeroAddress,
+			),
+		).not.toBe(-1)
+
+		const approvals = actions.expectedAllowances()
+
+		expect(approvals.length).toBe(2)
+		expect(
+			approvals.find(
+				(approval) =>
+					approval.token.address === config.market.base.token.address,
+			)?.amountString,
+		).toBe('1')
+		expect(
+			approvals.find(
+				(approval) =>
+					approval.token.address === config.market.quote.token.address,
+			)?.amountString,
+		).toBe('21000')
 	})
 })

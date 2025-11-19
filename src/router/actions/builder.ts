@@ -54,6 +54,7 @@ import {
 import type {
 	ActionElement,
 	ActionOrFailable,
+	AppendSettlementActionsOrSweep,
 	AuthorizeParams,
 	ClaimCancelParams,
 	ClearAllUptoParams,
@@ -124,7 +125,7 @@ export class VifRouterActionsBuilder<
 				],
 				[market.key, maxTick.value, fillVolume.amount, fillWants, maxOffers],
 			),
-			metadata: market,
+			metadata: { market, fillVolume },
 		} satisfies ActionElement<ActionOrFailable<Action.ORDER_SINGLE>>)
 		return this as unknown as VifRouterActionsBuilder<
 			ExtendActions<TActions, Action.ORDER_SINGLE, TCanFail>
@@ -213,7 +214,7 @@ export class VifRouterActionsBuilder<
 					limitVolume.amount,
 				],
 			),
-			metadata: { markets, fillWants },
+			metadata: { markets, fillWants, fillVolume },
 		} satisfies ActionElement<ActionOrFailable<Action.ORDER_MULTI>>)
 		return this as unknown as VifRouterActionsBuilder<
 			ExtendActions<TActions, Action.ORDER_MULTI, false>
@@ -268,7 +269,7 @@ export class VifRouterActionsBuilder<
 					Number(provision.amount / provision.token.unit),
 				],
 			),
-			metadata: { market, offerId: initialOfferId, provision, expiry },
+			metadata: { market, offerId: initialOfferId, gives, provision, expiry },
 		} satisfies ActionElement<ActionOrFailable<Action.LIMIT_SINGLE>>)
 		return this as unknown as VifRouterActionsBuilder<
 			ExtendActions<TActions, Action.LIMIT_SINGLE, TCanFail>
@@ -637,12 +638,12 @@ export class VifRouterActionsBuilder<
 				Number(isSettlementAction(b.action) || b.action === Action.SWEEP)
 			)
 		})
-		return this as VifRouterActionsBuilder<SortedActions<TActions>>
+		return this as unknown as VifRouterActionsBuilder<SortedActions<TActions>>
 	}
 
 	private _addRecommendedActions(
 		receiver: Address,
-	): VifRouterActionsBuilder<Action[]> {
+	): VifRouterActionsBuilder<AppendSettlementActionsOrSweep<TActions>> {
 		const settlements: Map<Address, Token> = new Map()
 		const takes: Map<Address, Token> = new Map()
 		let sweep = false
@@ -666,8 +667,8 @@ export class VifRouterActionsBuilder<
 				addTake(action.metadata.market.inboundToken.token)
 				addTake(Token.NATIVE_TOKEN)
 			} else if (isSingleOrderElement(action)) {
-				addSettlement(action.metadata.inboundToken.token)
-				addTake(action.metadata.outboundToken.token)
+				addSettlement(action.metadata.market.inboundToken.token)
+				addTake(action.metadata.market.outboundToken.token)
 				addTake(Token.NATIVE_TOKEN)
 			} else if (isMultiOrderElement(action)) {
 				addSettlement(action.metadata.markets.at(0)?.inboundToken.token)
@@ -702,7 +703,9 @@ export class VifRouterActionsBuilder<
 
 		if (sweep) this.sweep({ receiver, token: Token.NATIVE_TOKEN })
 
-		return this as unknown as VifRouterActionsBuilder<Action[]>
+		return this as unknown as VifRouterActionsBuilder<
+			AppendSettlementActionsOrSweep<TActions>
+		>
 	}
 
 	build<
@@ -717,7 +720,9 @@ export class VifRouterActionsBuilder<
 			? TReorderSettlements extends false
 				? TActions
 				: SortedActions<TActions>
-			: Action[]
+			: TReorderSettlements extends false
+				? AppendSettlementActionsOrSweep<TActions>
+				: AppendSettlementActionsOrSweep<SortedActions<TActions>>
 	> {
 		const { addRecommendedActions, reorderSettlements, receiver } = params ?? {}
 		if (reorderSettlements) this._reorderSettlements()

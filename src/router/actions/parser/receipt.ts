@@ -82,16 +82,18 @@ export function parseFromLogsDeprecated<
 				for (const [i, action] of actions.entries()) {
 					if (isSingleOrderElement(action)) {
 						if (results[i]?.data !== undefined) continue
-						if (action.metadata.key !== event.args.market) continue
+						if (action.metadata.market.key !== event.args.market) continue
 						results[i] = {
 							type: action.action,
 							success: true,
 							data: {
-								gave: action.metadata.inboundToken.token.amount(
+								gave: action.metadata.market.inboundToken.token.amount(
 									event.args.gave,
 								),
-								got: action.metadata.outboundToken.token.amount(event.args.got),
-								fee: action.metadata.inboundToken.token
+								got: action.metadata.market.outboundToken.token.amount(
+									event.args.got,
+								),
+								fee: action.metadata.market.inboundToken.token
 									.withUnit(1n)
 									.amount(event.args.fee),
 								bounty: Token.NATIVE_TOKEN.amount(event.args.bounty),
@@ -249,7 +251,7 @@ function parseSingleOrderFromEvents(
 	const index = events.findIndex(
 		(event) =>
 			event.eventName === 'MarketOrder' &&
-			event.args.market === action.metadata.key,
+			event.args.market === action.metadata.market.key,
 	)
 	if (index === -1) {
 		return {
@@ -263,9 +265,9 @@ function parseSingleOrderFromEvents(
 		type: action.action,
 		success: true,
 		data: {
-			gave: action.metadata.inboundToken.token.amount(event.args.gave),
-			got: action.metadata.outboundToken.token.amount(event.args.got),
-			fee: action.metadata.inboundToken.token
+			gave: action.metadata.market.inboundToken.token.amount(event.args.gave),
+			got: action.metadata.market.outboundToken.token.amount(event.args.got),
+			fee: action.metadata.market.inboundToken.token
 				.withUnit(1n)
 				.amount(event.args.fee),
 			bounty: Token.NATIVE_TOKEN.amount(event.args.bounty),
