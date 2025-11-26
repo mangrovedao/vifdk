@@ -34,6 +34,7 @@ export {
 	TokenAmount,
 	Token,
 	BitsOverflowError,
+	simulate,
 } from './lib/export'
 
 // router
