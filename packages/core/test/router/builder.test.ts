@@ -7,7 +7,7 @@ import {
 } from '../../src/router/actions/action-element'
 import { Action, isSettlementAction } from '../../src/router/actions/enum'
 import type { SortedActions } from '../../src/router/actions/types'
-import { VifRouter } from '../../src/router/export'
+import { VifRouter } from '../../src/router/router'
 import { config } from '../config/tokens'
 import { mainClient } from '../utils'
 

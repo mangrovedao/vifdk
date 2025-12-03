@@ -10,8 +10,6 @@ jobs:
   test:
     name: Test CI
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
 
     steps:
       - name: Checkout code

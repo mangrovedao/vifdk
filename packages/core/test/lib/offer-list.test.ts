@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { packedOfferList } from '../../src/builder/reader/offer-list'
 import { OfferList } from '../../src/lib/offer-list'
-import { Action } from '../../src/router/actions/enum'
+import { Action } from '../../src/router/export'
 import { VifRouter } from '../../src/router/router'
 import { mint } from '../config/mint'
 import { approveIfNeeded, config } from '../config/tokens'
