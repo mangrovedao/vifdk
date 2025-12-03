@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "vifdk",
@@ -19,6 +20,23 @@
       "optionalPeers": [
         "typescript",
       ],
+    },
+    "packages/core": {
+      "name": "vifdk",
+      "version": "0.0.1-alpha.10",
+      "peerDependencies": {
+        "typescript": ">=4.5.0",
+        "viem": ">=2.38.0",
+      },
+      "optionalPeers": [
+        "typescript",
+      ],
+    },
+    "packages/test": {
+      "name": "vifdk-test",
+      "dependencies": {
+        "vifdk": "workspace:*",
+      },
     },
   },
   "packages": {
@@ -373,6 +391,10 @@
     "unicorn-magic": ["unicorn-magic@0.3.0", "", {}, "sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA=="],
 
     "viem": ["viem@2.38.6", "", { "dependencies": { "@noble/curves": "1.9.1", "@noble/hashes": "1.8.0", "@scure/bip32": "1.7.0", "@scure/bip39": "1.6.0", "abitype": "1.1.0", "isows": "1.0.7", "ox": "0.9.6", "ws": "8.18.3" }, "peerDependencies": { "typescript": ">=5.0.4" }, "optionalPeers": ["typescript"] }, "sha512-aqO6P52LPXRjdnP6rl5Buab65sYa4cZ6Cpn+k4OLOzVJhGIK8onTVoKMFMT04YjDfyDICa/DZyV9HmvLDgcjkw=="],
+
+    "vifdk": ["vifdk@workspace:packages/core"],
+
+    "vifdk-test": ["vifdk-test@workspace:packages/test"],
 
     "which": ["which@2.0.2", "", { "dependencies": { "isexe": "^2.0.0" }, "bin": { "node-which": "./bin/node-which" } }, "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA=="],
 

@@ -1,9 +1,15 @@
-import { defineConfig } from 'bunup'
+import { defineWorkspace } from 'bunup'
 
-export default defineConfig({
-	format: ['esm', 'cjs'],
-	exports: {
-		includePackageJson: true,
+export default defineWorkspace([
+	{
+		name: 'vifdk',
+		root: 'packages/core',
+		config: {
+			format: ['esm', 'cjs'],
+			exports: {
+				includePackageJson: true,
+			},
+			entry: ['src/**/index.ts'],
+		},
 	},
-	entry: ['src/**/index.ts'],
-})
+])
