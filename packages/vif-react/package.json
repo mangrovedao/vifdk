@@ -1,0 +1,45 @@
+{
+	"name": "vif-react",
+	"version": "0.0.1",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"module": "./dist/index.js",
+	"main": "./dist/index.cjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./package.json": "./package.json"
+	},
+	"homepage": "https://github.com/mangrovedao/vifdk#readme",
+	"bugs": {
+		"url": "https://github.com/mangrovedao/vifdk/issues"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/mangrovedao/vifdk.git"
+	},
+	"peerDependencies": {
+		"react": ">=18",
+		"typescript": ">=5.0.4",
+		"vifdk": "workspace:*",
+		"wagmi": ">=3.0.0",
+		"viem": ">=2.40.0"
+	},
+	"peerDependenciesMeta": {
+		"typescript": {
+			"optional": true
+		}
+	}
+}

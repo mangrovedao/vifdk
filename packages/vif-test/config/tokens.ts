@@ -7,8 +7,7 @@ import {
 	parseAbi,
 } from 'viem'
 import { multicall, writeContractSync } from 'viem/actions'
-import { Market } from '../../src/lib/market'
-import { Token, type TokenAmount } from '../../src/lib/token'
+import { Market, Token, type TokenAmount } from '../../core/src'
 import { bytesCodes } from '../static/bytescodes'
 import { ERC20Abi } from '../static/ERC20Abi'
 import { mint } from './mint'

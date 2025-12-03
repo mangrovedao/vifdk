@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'bun:test'
-import { MAX_TICK, MIN_TICK } from '../../src/lib/constants'
-import { TickSpacingOverflowError } from '../../src/lib/market'
-import { PriceOverflowError, Tick, TickOverflowError } from '../../src/lib/tick'
+import { MAX_TICK, MIN_TICK } from '../../core/src/lib/constants'
+import { TickSpacingOverflowError } from '../../core/src/lib/market'
+import {
+	PriceOverflowError,
+	Tick,
+	TickOverflowError,
+} from '../../core/src/lib/tick'
 
 describe('Tick.checkTick', () => {
 	it('accepts boundary ticks', () => {

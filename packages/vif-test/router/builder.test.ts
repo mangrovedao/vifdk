@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'bun:test'
 import { zeroAddress } from 'viem'
-import { Token } from '../../src/lib/token'
+import { Action, Token, VifRouter } from '../../core/src'
 import {
 	isSettleAllElement,
 	isTakeAllElement,
-} from '../../src/router/actions/action-element'
-import { Action, isSettlementAction } from '../../src/router/actions/enum'
-import type { SortedActions } from '../../src/router/actions/types'
-import { VifRouter } from '../../src/router/router'
+} from '../../core/src/router/actions/action-element'
+import { isSettlementAction } from '../../core/src/router/actions/enum'
+import type { SortedActions } from '../../core/src/router/actions/types'
 import { config } from '../config/tokens'
 import { mainClient } from '../utils'
 

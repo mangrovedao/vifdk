@@ -13,7 +13,7 @@ let _bytesCodes: Promise<Bytecodes> | undefined
 
 export function bytesCodes(): Promise<Bytecodes> {
 	if (!_bytesCodes) {
-		_bytesCodes = Bun.file('./test/static/bytecodes.json').json()
+		_bytesCodes = Bun.file('./packages/vif-test/static/bytecodes.json').json()
 	}
 	return _bytesCodes
 }

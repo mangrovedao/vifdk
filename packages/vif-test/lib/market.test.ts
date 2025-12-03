@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { Market } from '../../src/lib/market'
+import { Market } from '../../core/src/lib/market'
 import { config } from '../config/tokens'
 
 describe('Market', () => {

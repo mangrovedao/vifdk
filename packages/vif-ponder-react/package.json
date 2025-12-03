@@ -17,6 +17,16 @@
 	"module": "./dist/index.js",
 	"main": "./dist/index.cjs",
 	"types": "./dist/index.d.ts",
+	"peerDependencies": {
+		"@ponder/react": ">=0.15.13",
+		"@ponder/client": ">=0.15.13",
+		"@tanstack/react-query": ">=5.0.0",
+		"react": ">=18",
+		"typescript": ">=5.0.4"
+	},
+	"devDependencies": {
+		"ponder": ">=0.15.13"
+	},
 	"exports": {
 		".": {
 			"import": {

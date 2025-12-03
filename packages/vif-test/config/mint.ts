@@ -6,7 +6,7 @@ import {
 	type TestClient,
 } from 'viem'
 import { getBalance, setBalance, writeContract } from 'viem/actions'
-import type { TokenAmount } from '../../src/lib/token'
+import type { TokenAmount } from '../../core/src'
 import { ERC20Abi } from '../static/ERC20Abi'
 import { config } from './tokens'
 

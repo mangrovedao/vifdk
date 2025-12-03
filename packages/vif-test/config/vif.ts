@@ -5,18 +5,20 @@ import {
 	isAddressEqual,
 } from 'viem'
 import { multicall, readContract, writeContractSync } from 'viem/actions'
-import { rawOffer } from '../../src/builder/core/offer'
-import { Market, type SemiMarket } from '../../src/lib/market'
-import { Offer } from '../../src/lib/offer'
-import type { Tick } from '../../src/lib/tick'
-import { Token, type TokenAmount } from '../../src/lib/token'
-import type { VifRouterActions } from '../../src/router/actions/actions'
-import type { Action } from '../../src/router/actions/enum'
-import type {
-	LimitOrderResult,
-	OrderResult,
-} from '../../src/router/actions/types'
-import { VifRouter } from '../../src/router/router'
+import {
+	type Action,
+	type LimitOrderResult,
+	Market,
+	Offer,
+	type OrderResult,
+	type SemiMarket,
+	type Tick,
+	Token,
+	type TokenAmount,
+	VifRouter,
+	type VifRouterActions,
+} from '../../core/src'
+import { rawOffer } from '../../core/src/builder/core'
 import { bytesCodes } from '../static/bytescodes'
 import { VifAbi } from '../static/VifAbi'
 import { VifReaderAbi } from '../static/VifReaderABI'

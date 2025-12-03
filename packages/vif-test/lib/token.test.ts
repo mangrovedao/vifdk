@@ -4,7 +4,7 @@ import { formatUnits, parseUnits } from 'viem'
 import {
 	Token,
 	UnitOverflowError as TokenUnitOverflowError,
-} from '../../src/lib/token'
+} from '../../core/src/lib/token'
 
 const WETH_ADDRESS: Address = '0x0000000000000000000000000000000000000001'
 const USDC_ADDRESS: Address = '0x0000000000000000000000000000000000000002'

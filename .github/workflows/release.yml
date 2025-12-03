@@ -66,6 +66,12 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
 
+      - name: Publish vif-react to npm
+        run: cd packages/vif-react && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+
       - name: Publish vif-ponder-react to npm
         run: cd packages/vif-ponder-react && npm publish --access public
         env:

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { Action } from '../../src/router/actions/enum'
-import { VifRouter } from '../../src/router/router'
+import { Action, VifRouter } from '../../core/src'
 import { mint } from '../config/mint'
 import { approveIfNeeded, config } from '../config/tokens'
 import { authorize, createOffers } from '../config/vif'

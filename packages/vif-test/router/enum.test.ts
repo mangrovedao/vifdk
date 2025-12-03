@@ -4,7 +4,7 @@ import {
 	isFailableAction,
 	isSettlementAction,
 	toNonFailableAction,
-} from '../../src/router/actions/enum'
+} from '../../core/src/router/actions/enum'
 
 describe('Enum', () => {
 	const actions = Object.values(Action).filter((v) => typeof v === 'number')
