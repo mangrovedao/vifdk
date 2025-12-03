@@ -25,6 +25,9 @@ jobs:
       - name: Show Anvil version
         run: anvil --version
 
+      - name: Setup node
+        uses: actions/setup-node@v4
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -55,13 +58,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish core to npm
-        run: cd packages/core && npm publish --access public
+        run: cd packages/core && npm publish --provenance --access public
         env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
 
       - name: Publish vif-ponder-react to npm
-        run: cd packages/vif-ponder-react && npm publish --access public
+        run: cd packages/vif-ponder-react && npm publish --provenance --access public
         env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
