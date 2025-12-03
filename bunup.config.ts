@@ -12,4 +12,15 @@ export default defineWorkspace([
 			entry: ['src/**/index.ts'],
 		},
 	},
+	{
+		name: 'vif-ponder-react',
+		root: 'packages/vif-ponder-react',
+		config: {
+			format: ['esm', 'cjs'],
+			exports: {
+				includePackageJson: true,
+			},
+			entry: ['src/**/index.ts'],
+		},
+	},
 ])
