@@ -17,7 +17,7 @@
     },
     "packages/core": {
       "name": "vifdk",
-      "version": "0.0.3",
+      "version": "0.0.5",
       "peerDependencies": {
         "typescript": ">=4.5.0",
         "viem": ">=2.38.0",
@@ -28,7 +28,7 @@
     },
     "packages/vif-ponder-react": {
       "name": "vif-ponder-react",
-      "version": "0.0.3",
+      "version": "0.0.5",
       "devDependencies": {
         "ponder": ">=0.15.13",
       },
@@ -42,7 +42,7 @@
     },
     "packages/vif-react": {
       "name": "vif-react",
-      "version": "0.0.3",
+      "version": "0.0.5",
       "peerDependencies": {
         "react": ">=18",
         "typescript": ">=5.0.4",
