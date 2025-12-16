@@ -3,12 +3,7 @@ export { createVifConfig } from './config'
 
 export { VifProvider } from './context'
 export type {
-	ReaderOfferListParams,
-	ReaderOpenMarketsParams,
+	useReaderOfferListParams,
+	useReaderOpenMarketsParams,
 } from './hooks/export'
-export {
-	useReaderOfferList,
-	useReaderOpenMarkets,
-	useVif,
-	useVifConfig,
-} from './hooks/export'
+export { useVif, useVifConfig } from './hooks/export'

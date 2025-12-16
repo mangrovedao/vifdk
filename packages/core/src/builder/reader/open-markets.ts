@@ -112,6 +112,7 @@ export function openMarkets(
 		args: from ? [BigInt(from), BigInt(maxLength)] : [],
 	}
 }
+
 /**
  * Creates parameters for fetching basic token metadata (decimals and symbol)
  * @param token - Token contract address

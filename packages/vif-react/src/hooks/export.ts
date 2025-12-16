@@ -1,7 +1,6 @@
 export { useVifConfig } from './config'
 export type {
-	ReaderOfferListParams,
-	ReaderOpenMarketsParams,
+	useReaderOfferListParams,
+	useReaderOpenMarketsParams,
 } from './public/export'
-export { useReaderOfferList, useReaderOpenMarkets } from './public/export'
 export { useVif } from './vif'

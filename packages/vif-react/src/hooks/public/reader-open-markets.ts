@@ -1,36 +1,41 @@
-import type { MulticallErrorType, ReadContractErrorType } from 'viem'
+import { useCallback } from 'react'
+import type { ReadContractReturnType } from 'viem'
 import { Market } from 'vifdk'
 import { openMarkets } from 'vifdk/builder/reader'
-import { type UseReadContractParameters, useReadContract } from 'wagmi'
-import type { QueryParameter } from 'wagmi/internal'
-import type { UseQueryReturnType } from 'wagmi/query'
+import type { PrepareReadResult } from '../types'
 import { useVif } from '../vif'
 
-export type ReaderOpenMarketsParams = Omit<
-	UseReadContractParameters,
-	'address' | 'abi' | 'functionName' | 'args'
->
+type ReaderContracts = ReturnType<typeof openMarkets>
 
-export function useReaderOpenMarkets(
-	params: ReaderOpenMarketsParams = {},
-): UseQueryReturnType<
-	Market[] | undefined,
-	MulticallErrorType | ReadContractErrorType
+export function useReaderOpenMarketsParams(
+	from?: number,
+	maxLength?: number,
+): PrepareReadResult<
+	Market[],
+	ReaderContracts['abi'],
+	ReaderContracts['functionName']
 > {
 	const vif = useVif()
-	const { query, ...restParams } = params
-	return useReadContract({
-		...restParams,
-		address: vif?.reader,
-		...openMarkets(),
-		query: {
-			...(query as unknown as QueryParameter),
-			select(data) {
-				const tokens = vif?.tokens ?? []
-				return data
-					.map((market) => Market.fromOpenMarketResult(market, tokens))
-					.filter((market) => market !== undefined)
-			},
+
+	const select = useCallback(
+		(
+			data: ReadContractReturnType<
+				ReaderContracts['abi'],
+				ReaderContracts['functionName']
+			>,
+		) => {
+			const tokens = vif?.tokens ?? []
+			return data
+				.map((market) => Market.fromOpenMarketResult(market, tokens))
+				.filter((market) => market !== undefined)
 		},
-	})
+		[vif?.tokens],
+	)
+
+	return {
+		address: vif?.reader,
+		select,
+		initialData: [],
+		...openMarkets(from, maxLength),
+	}
 }
