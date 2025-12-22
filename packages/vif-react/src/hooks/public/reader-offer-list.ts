@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import type { Address, MulticallResults } from 'viem'
-import { type Market, OfferList } from 'vifdk'
-import { packedOfferList } from 'vifdk/builder/reader'
+import { type Market, OfferList, packedOfferList } from 'vifdk'
 import type { PrepareReadsResult } from '../types'
 import { useVif } from '../vif'
 

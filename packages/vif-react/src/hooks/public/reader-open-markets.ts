@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import type { ReadContractReturnType } from 'viem'
-import { Market } from 'vifdk'
-import { openMarkets } from 'vifdk/builder/reader'
+import { Market, openMarkets } from 'vifdk'
 import type { PrepareReadResult } from '../types'
 import { useVif } from '../vif'
 

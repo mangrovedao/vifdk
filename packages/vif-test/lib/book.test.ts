@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { packedBook } from '../../core/src/builder/reader/book'
-import { Book } from '../../core/src/lib/book'
+import { Book, packedBook } from '../../core/src'
 import { VifRouter } from '../../core/src/router/router'
 import { mint } from '../config/mint'
 import { approveIfNeeded, config } from '../config/tokens'

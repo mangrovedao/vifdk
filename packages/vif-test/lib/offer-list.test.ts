@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { packedOfferList } from '../../core/src/builder/reader/offer-list'
-import { OfferList } from '../../core/src/lib/offer-list'
+import { OfferList, packedOfferList } from '../../core/src'
 import { Action } from '../../core/src/router/export'
 import { VifRouter } from '../../core/src/router/router'
 import { mint } from '../config/mint'

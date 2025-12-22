@@ -20,46 +20,6 @@
 				"default": "./dist/index.cjs"
 			}
 		},
-		"./builder/router": {
-			"import": {
-				"types": "./dist/builder/router/index.d.ts",
-				"default": "./dist/builder/router/index.js"
-			},
-			"require": {
-				"types": "./dist/builder/router/index.d.cts",
-				"default": "./dist/builder/router/index.cjs"
-			}
-		},
-		"./builder/core": {
-			"import": {
-				"types": "./dist/builder/core/index.d.ts",
-				"default": "./dist/builder/core/index.js"
-			},
-			"require": {
-				"types": "./dist/builder/core/index.d.cts",
-				"default": "./dist/builder/core/index.cjs"
-			}
-		},
-		"./builder/reader": {
-			"import": {
-				"types": "./dist/builder/reader/index.d.ts",
-				"default": "./dist/builder/reader/index.js"
-			},
-			"require": {
-				"types": "./dist/builder/reader/index.d.cts",
-				"default": "./dist/builder/reader/index.cjs"
-			}
-		},
-		"./actions/router": {
-			"import": {
-				"types": "./dist/actions/router/index.d.ts",
-				"default": "./dist/actions/router/index.js"
-			},
-			"require": {
-				"types": "./dist/actions/router/index.d.cts",
-				"default": "./dist/actions/router/index.cjs"
-			}
-		},
 		"./package.json": "./package.json"
 	},
 	"homepage": "https://github.com/mangrovedao/vifdk#readme",
