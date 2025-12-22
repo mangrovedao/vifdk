@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { Offer, Token } from '../../core/src'
-import { rawOffer } from '../../core/src/builder/core'
+import { Offer, rawOffer, Token } from '../../core/src'
 import { Action } from '../../core/src/router/actions/enum'
 import { VifRouter } from '../../core/src/router/router'
 import { config } from '../config/tokens'

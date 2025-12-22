@@ -8,7 +8,7 @@ import type {
 } from 'viem'
 import { simulateContract, writeContract } from 'viem/actions'
 import { getAction } from 'viem/utils'
-import { RouterExecuteABI } from '../../builder/router'
+import { RouterExecuteABI } from '../../builder/router/execute'
 import type { RouterExecuteParams } from './types'
 
 export function execute(

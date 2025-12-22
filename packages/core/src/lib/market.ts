@@ -5,7 +5,7 @@ import {
 	isAddressEqual,
 	keccak256,
 } from 'viem'
-import type { OPEN_MARKETS_ABI } from '../builder/reader'
+import type { OPEN_MARKETS_ABI } from '../builder/reader/open-markets'
 import { InvalidTokenError } from '../router/actions/errors'
 import { FEES_BITS, MAX_TICK_SPACING, MIN_TICK_SPACING } from './constants'
 import { Tick } from './tick'

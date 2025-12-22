@@ -11,6 +11,7 @@ import {
 	Market,
 	Offer,
 	type OrderResult,
+	rawOffer,
 	type SemiMarket,
 	type Tick,
 	Token,
@@ -18,7 +19,6 @@ import {
 	VifRouter,
 	type VifRouterActions,
 } from '../../core/src'
-import { rawOffer } from '../../core/src/builder/core'
 import { bytesCodes } from '../static/bytescodes'
 import { VifAbi } from '../static/VifAbi'
 import { VifReaderAbi } from '../static/VifReaderABI'

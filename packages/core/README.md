@@ -29,8 +29,7 @@ const tokens = [
 You can get the list of open markets that are trustlessly updated on the `VifReader` contract like this:
 
 ```ts
-import { Market } from 'vifdk';
-import { openMarkets } from 'vifdk/builder/reader';
+import { Market, openMarkets } from 'vifdk';
 
 const markets = await client.readContract({
 	address: config.VifReader,
