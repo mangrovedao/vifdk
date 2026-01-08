@@ -292,9 +292,17 @@ export class Market {
 		const isReversed = index0 > index1
 
 		// biome-ignore lint/style/noNonNullAssertion: we know the tokens are in the array
-		const token0 = tokens[index0]!.withUnit(result.market01.outboundUnits)
+		const token0 = tokens[index0]!.withUnit(
+			result.market01.outboundUnits,
+		).amount(
+			BigInt(result.market01.minOutboundUnits) * result.market01.outboundUnits,
+		)
 		// biome-ignore lint/style/noNonNullAssertion: we know the tokens are in the array
-		const token1 = tokens[index1]!.withUnit(result.market01.inboundUnits)
+		const token1 = tokens[index1]!.withUnit(
+			result.market10.outboundUnits,
+		).amount(
+			BigInt(result.market10.minOutboundUnits) * result.market10.outboundUnits,
+		)
 
 		return Market.create(
 			isReversed
