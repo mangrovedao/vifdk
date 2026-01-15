@@ -36,6 +36,7 @@ export const VifEventsABI = [
 				internalType: 'uint256',
 			},
 			{ name: 'fillWants', type: 'bool', indexed: false, internalType: 'bool' },
+			{ name: 'maxTick', type: 'int24', indexed: false, internalType: 'int24' },
 		],
 		anonymous: false,
 	},
