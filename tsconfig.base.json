@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "ES2021",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"lib": ["ES2023", "DOM"],
+		"strict": true,
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noFallthroughCasesInSwitch": true,
+		"isolatedDeclarations": true,
+		"verbatimModuleSyntax": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
+	}
+}

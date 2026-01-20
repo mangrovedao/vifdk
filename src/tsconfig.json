@@ -1,0 +1,11 @@
+{
+	"extends": "../tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"module": "preserve",
+		"moduleResolution": "bundler",
+		"isolatedDeclarations": false
+	},
+	"include": ["./**/*.ts"],
+	"exclude": ["./**/*.test.ts", "./_cjs/**", "./_esm/**", "./_types/**"]
+}

@@ -1,0 +1,14 @@
+{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"rootDir": "./src",
+		"declarationDir": "./src/_types",
+		"emitDeclarationOnly": true,
+		"declaration": true,
+		"declarationMap": true,
+		"module": "es2020",
+		"moduleResolution": "bundler"
+	},
+	"include": ["./src"],
+	"exclude": ["./src/**/*.test.ts", "./src/**/*.test-d.ts"]
+}
