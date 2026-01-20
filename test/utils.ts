@@ -12,21 +12,22 @@ export const PORT = 8545
 export const BASE_IPC = '/tmp/base.ipc'
 export const BASE_PORT = 8546
 
-// Map test IDs to pool IDs for consistent pool assignment within a test
-const testPoolIds = new Map<string, number>()
-let poolIdCounter = 0
-
+/**
+ * Generate a unique pool ID from a test ID using a simple hash.
+ * This ensures each test gets a unique anvil fork regardless of
+ * worker process boundaries or execution order.
+ */
 function getPoolIdForTest(testId: string): number {
-	let poolId = testPoolIds.get(testId)
-	if (poolId === undefined) {
-		const base =
-			Number(process.env.VITEST_POOL_ID ?? 1) *
-			Number(process.env.VITEST_SHARD_ID ?? 1) *
-			100000
-		poolId = base + poolIdCounter++
-		testPoolIds.set(testId, poolId)
+	let hash = 0
+	for (let i = 0; i < testId.length; i++) {
+		const char = testId.charCodeAt(i)
+		hash = (hash << 5) - hash + char
+		hash = hash & hash // Convert to 32-bit integer
 	}
-	return poolId
+	// Ensure positive number and add some entropy from env
+	const base = Math.abs(hash)
+	const poolId = Number(process.env.VITEST_POOL_ID ?? 1)
+	return base + poolId * 1000000
 }
 
 export function mainClient(testId: string, multicallAddress?: Address) {

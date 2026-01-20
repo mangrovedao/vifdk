@@ -23,3 +23,6 @@ yarn-error.log*
 src/_cjs/
 src/_esm/
 src/_types/
+
+# Claude Code
+.claude/
