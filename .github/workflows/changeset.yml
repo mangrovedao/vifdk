@@ -1,0 +1,45 @@
+name: Changeset
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  changeset:
+    name: Changeset Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check for changesets
+        run: |
+          # Check if there are any changeset files (excluding config and readme)
+          CHANGESETS=$(find .changeset -name "*.md" ! -name "README.md" 2>/dev/null | wc -l)
+          if [ "$CHANGESETS" -eq 0 ]; then
+            echo "::warning::No changeset found. If this PR should trigger a release, run 'bun changeset' to create one."
+            echo ""
+            echo "## ⚠️ No Changeset Found"
+            echo ""
+            echo "This PR does not have a changeset. If this change should be included in the next release:"
+            echo ""
+            echo "1. Run \`bun changeset\` locally"
+            echo "2. Select the type of change (patch/minor/major)"
+            echo "3. Write a summary of the changes"
+            echo "4. Commit the generated changeset file"
+            echo ""
+            echo "If this PR should NOT trigger a release (e.g., docs, CI changes), you can ignore this warning."
+          else
+            echo "✅ Found $CHANGESETS changeset(s)"
+          fi
