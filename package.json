@@ -1,7 +1,7 @@
 {
 	"name": "vifdk",
 	"description": "Typescript SDK to interact with the Vif order-book DeX",
-	"version": "0.0.13",
+	"version": "0.1.0",
 	"type": "module",
 	"main": "./src/_cjs/index.js",
 	"module": "./src/_esm/index.js",
