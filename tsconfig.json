@@ -3,14 +3,13 @@
 	"compilerOptions": {
 		"noEmit": true,
 		"module": "preserve",
-		"moduleResolution": "bundler"
+		"moduleResolution": "bundler",
+		"isolatedDeclarations": false,
+		"baseUrl": ".",
+		"paths": {
+			"~test/*": ["./test/*"]
+		}
 	},
 	"include": ["./src/**/*.ts", "./test/**/*.ts"],
-	"exclude": [
-		"./src/_cjs/**",
-		"./src/_esm/**",
-		"./src/_types/**",
-		"./src/**/*.test.ts",
-		"./test/**"
-	]
+	"exclude": ["./src/_cjs/**", "./src/_esm/**", "./src/_types/**"]
 }

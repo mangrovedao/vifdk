@@ -294,7 +294,7 @@ export async function createOffers(
 					...rawOffer(
 						offer.market,
 						// biome-ignore lint/style/noNonNullAssertion: test env
-						(results[i].data as LimitOrderResult | undefined)!.offerId,
+						(results[i]!.data as LimitOrderResult | undefined)!.offerId,
 					),
 				}) as const,
 		),
@@ -306,7 +306,7 @@ export async function createOffers(
 				offers[i]!.market,
 				r,
 				// biome-ignore lint/style/noNonNullAssertion: test env
-				(results[i].data as LimitOrderResult | undefined)!.offerId,
+				(results[i]!.data as LimitOrderResult | undefined)!.offerId,
 				// biome-ignore lint/style/noNonNullAssertion: test env
 				client.account!.address,
 			),
