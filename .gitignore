@@ -18,3 +18,11 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 .turbo
+
+# Build outputs
+src/_cjs/
+src/_esm/
+src/_types/
+
+# Claude Code
+.claude/
