@@ -1,21 +1,15 @@
-import { beforeAll, describe, expect, it } from 'vitest'
-import { getTestConfig, type TestConfig, toVifTestConfig } from '~test/config'
 import { authorize, createOffer, marketOrder } from '~test/config/vif'
+import { describe, expect, test } from '~test/fixture'
 import { VifRouterAbi } from '~test/static/VifRouterABI'
-import { mainClient } from '~test/utils'
 import { Offer, rawOffer, Token } from '../index'
 import { Action } from './actions/enum'
 import { VifRouter } from './router'
 
 describe('Limit order', () => {
-	let config: TestConfig
-
-	beforeAll(() => {
-		config = getTestConfig()
-	})
-
-	it('should create a limit order, and parse it correctly', async () => {
-		const client = mainClient(config.multicall)
+	test('should create a limit order, and parse it correctly', async ({
+		client,
+		config,
+	}) => {
 		await authorize(client, config.Vif, config.VifRouter)
 		// create a sell order for 1 ETH
 		const router = new VifRouter(config.VifRouter, config.Vif, client.chain.id)
@@ -143,9 +137,7 @@ describe('Limit order', () => {
 		expect(offer.data.isActive).toBe(true)
 	})
 
-	it('Should cancel a limit order', async () => {
-		const client = mainClient(config.multicall)
-		const vifConfig = toVifTestConfig(config)
+	test('Should cancel a limit order', async ({ client, config, vifConfig }) => {
 		await authorize(client, config.Vif, config.VifRouter)
 		const offer = await createOffer(
 			client,
@@ -249,9 +241,11 @@ describe('Limit order', () => {
 		expect(parsedReceipt[2].success).toBe(true)
 	})
 
-	it('Should cancel a consumed limit order', async () => {
-		const client = mainClient(config.multicall)
-		const vifConfig = toVifTestConfig(config)
+	test('Should cancel a consumed limit order', async ({
+		client,
+		config,
+		vifConfig,
+	}) => {
 		await authorize(client, config.Vif, config.VifRouter)
 		const offer = await createOffer(
 			client,
@@ -357,9 +351,11 @@ describe('Limit order', () => {
 		expect(parsedReceipt[3].data).toBeUndefined()
 	})
 
-	it('Should claim a consumed limit order', async () => {
-		const client = mainClient(config.multicall)
-		const vifConfig = toVifTestConfig(config)
+	test('Should claim a consumed limit order', async ({
+		client,
+		config,
+		vifConfig,
+	}) => {
 		await authorize(client, config.Vif, config.VifRouter)
 		const offer = await createOffer(
 			client,

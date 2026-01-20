@@ -1,23 +1,17 @@
-import { beforeAll, describe, expect, it } from 'vitest'
-import { getTestConfig, type TestConfig, toVifTestConfig } from '~test/config'
 import { mint } from '~test/config/mint'
 import { approveIfNeeded } from '~test/config/tokens'
 import { authorize, createOffers } from '~test/config/vif'
+import { describe, expect, test } from '~test/fixture'
 import { VifRouterAbi } from '~test/static/VifRouterABI'
 import { expectCloseTo } from '~test/test-utils'
-import { mainClient } from '~test/utils'
 import { Action, VifRouter } from '../index'
 
 describe('Market order', () => {
-	let config: TestConfig
-
-	beforeAll(() => {
-		config = getTestConfig()
-	})
-
-	it('should create a market order', async () => {
-		const client = mainClient(config.multicall)
-		const vifConfig = toVifTestConfig(config)
+	test('should create a market order', async ({
+		client,
+		config,
+		vifConfig,
+	}) => {
 		await authorize(client, config.Vif, config.VifRouter)
 		await createOffers(
 			client,

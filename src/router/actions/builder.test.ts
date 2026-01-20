@@ -1,20 +1,12 @@
 import { zeroAddress } from 'viem'
-import { beforeAll, describe, expect, it } from 'vitest'
-import { getTestConfig, type TestConfig } from '~test/config'
-import { mainClient } from '~test/utils'
+import { describe, expect, test } from '~test/fixture'
 import { Action, Token, VifRouter } from '../../index'
 import { isSettleAllElement, isTakeAllElement } from './action-element'
 import { isSettlementAction } from './enum'
 import type { SortedActions } from './types'
 
 describe('Builder', () => {
-	let config: TestConfig
-
-	beforeAll(() => {
-		config = getTestConfig()
-	})
-
-	it('should reorder settlements correctly (with correct types)', () => {
+	test('should reorder settlements correctly (with correct types)', () => {
 		const actions = [
 			Action.SETTLE_ALL,
 			Action.LIMIT_SINGLE,
@@ -39,8 +31,10 @@ describe('Builder', () => {
 		expect(sorted[4]).toBe(Action.SWEEP)
 	})
 
-	it('should add the correct recommended actions and correct approval recommendations', () => {
-		const client = mainClient()
+	test('should add the correct recommended actions and correct approval recommendations', ({
+		client,
+		config,
+	}) => {
 		const router = new VifRouter(config.VifRouter, config.Vif, client.chain.id)
 		const actions = router
 			.createTypedActions()

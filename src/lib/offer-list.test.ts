@@ -1,24 +1,18 @@
-import { beforeAll, describe, expect, it } from 'vitest'
-import { getTestConfig, type TestConfig, toVifTestConfig } from '~test/config'
 import { mint } from '~test/config/mint'
 import { approveIfNeeded } from '~test/config/tokens'
 import { authorize, createOffers } from '~test/config/vif'
+import { describe, expect, test } from '~test/fixture'
 import { VifRouterAbi } from '~test/static/VifRouterABI'
-import { mainClient } from '~test/utils'
 import { OfferList, packedOfferList } from '../index'
 import { Action } from '../router/export'
 import { VifRouter } from '../router/router'
 
 describe('OfferList', () => {
-	let config: TestConfig
-
-	beforeAll(() => {
-		config = getTestConfig()
-	})
-
-	it('should parse and simulate order correctly (exact in)', async () => {
-		const client = mainClient(config.multicall)
-		const vifConfig = toVifTestConfig(config)
+	test('should parse and simulate order correctly (exact in)', async ({
+		client,
+		config,
+		vifConfig,
+	}) => {
 		await authorize(client, config.Vif, config.VifRouter)
 		await createOffers(
 			client,
@@ -92,9 +86,11 @@ describe('OfferList', () => {
 		expect(takeResult.data).toBeUndefined()
 	})
 
-	it('should simulate the book correctly (exact out)', async () => {
-		const client = mainClient(config.multicall)
-		const vifConfig = toVifTestConfig(config)
+	test('should simulate the book correctly (exact out)', async ({
+		client,
+		config,
+		vifConfig,
+	}) => {
 		await authorize(client, config.Vif, config.VifRouter)
 		await createOffers(
 			client,
